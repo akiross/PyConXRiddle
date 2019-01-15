@@ -13,18 +13,18 @@ Each riddle has an entry-point which is enabled when the riddle is enabled.
 
 ## Example structure
 
- game/
-  +--- intro.py
-  +--. level0
-     +--- testA0.py
-	 +--- testB0.py
-	 +--- testC0.py
-	 +--. level1A
-	 |  +--- testA1.py
-	 |  +--. level2
-	 |     +--- testA2.py
-	 +--. level1B
-	    +--- testB1.py
+     game/
+      +--- intro.py
+      +--. level0
+         +--- testA0.py
+         +--- testB0.py
+         +--- testC0.py
+         +--. level1A
+         |  +--- testA1.py
+         |  +--. level2
+         |     +--- testA2.py
+         +--. level1B
+            +--- testB1.py
 
 In this case, to win the game the user shall complete the intro level first,
 then he can complete tests A0, B0 or C0 in any order, but tests A1, A2 and B1
