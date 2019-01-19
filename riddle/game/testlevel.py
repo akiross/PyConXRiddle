@@ -2,6 +2,10 @@
 
 import random
 
+from flask import session
+
+from riddle.utils import create_user
+
 
 entry_text = '''This is what you see when the user accesses the level.
 
@@ -21,11 +25,12 @@ fail_text = '''I am sorry, but this is not correct... Try again, please!'''
 
 
 def entry():
-    return entry_text
+    if session.get('user_id') is None:
+        session['user_id'] = create_user()
+    return f'{entry_text}\n Your user_id is {session["user_id"]}'
 
 
 def verify():
     if random.random() < 0.25:
         return success_text
     return fail_text
-

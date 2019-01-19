@@ -1,34 +1,30 @@
-import logging
 import importlib
+import pathlib
+
 from flask import Flask
-from pathlib import Path
+
+from riddle import database
+from riddle import cli
 
 
-def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev'
-    )
+def page_not_found(err):
+    return "Apparently, someone did a mistake.", 404
 
-    if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        app.config.from_mapping(test_config)
 
-    # from . import challenge
-    # app.register_blueprint(challenge.bp)
-    # app.add_url_rule('/', endpoint='index')
+def create_app():
+    app = Flask(__name__)
+    app.config.from_envvar('RIDDLE_CONFIG')
 
-    @app.errorhandler(404)
-    def page_not_found(err):
-        return "Apparently, someone did a mistake.", 404
-    
-    levels = Path(__file__).parent / 'game'
+    app.register_error_handler(404, page_not_found)
+    app.teardown_appcontext(database.close_connection)
+    app.cli.add_command(cli.init_db)
+
+    levels = pathlib.Path(__file__).parent / 'game'
     for n in levels.glob('*.py'):
         try:
             mod = importlib.import_module('.' + n.stem, 'riddle.game')
             app.route('/' + n.stem)(mod.entry)
-        except:
-            logging.exception(f"Unable to load module {n}")
+        except Exception as e:
+            app.logger.exception(f"Unable to load module {n}: {e}")
 
     return app
