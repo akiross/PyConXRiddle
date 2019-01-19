@@ -48,3 +48,38 @@ Using using a stateless server helps in:
 
 Each riddle is in a single python file (usually, they are not huge), and they
 will export some data used by the software.
+
+
+## Install
+
+It's possible to install the project dependecies with pipenv:
+
+`pipenv install`
+
+or pip:
+
+`pip install -r requirements.txt`
+
+
+## Run
+
+A configuration `.cfg` file is needed to run the application.
+There is a ready made file `dev.cfg` in the root of the project that can be used for development.
+
+The database should be initialized calling the command:
+
+`flask init-db` 
+
+The path of the preferred config file should be set to the environment variable `RIDDLE_CONFIG`:
+
+`export RIDDLE_CONFIG=/path/to/config/file`
+
+To run the application execute this command:
+
+`flask run`
+
+for production this one:
+
+`gunicorn -w {worker_number} -b {host}:{port} 'riddle:create_app()'`
+
+(obviusly you need to replace the placeholders with the correct values)
