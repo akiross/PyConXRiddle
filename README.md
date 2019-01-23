@@ -32,7 +32,7 @@ are not accessible. Once A0, B0 and C0 are completed, A1 and B1 are accessible,
 and after A1 is complete, A2 can be accessed to beat the game. Note that it is
 not necessary to complete test B1 to access A2, as in folder level1A there is
 only one module, testA1, which is the sole requisite to access level2.
-  
+
 ## Codebase
 
 One shall strive to make the game the more stateless as possible. The software

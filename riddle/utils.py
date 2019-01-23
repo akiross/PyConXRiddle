@@ -1,4 +1,6 @@
+import os
 from riddle import database
+from pathlib import Path
 
 
 def create_user():
@@ -14,3 +16,7 @@ def update_user_progress(user_id, level):
         'INSERT INTO progress (user_id, level) values(?,?)',
         [user_id, level])
     db.commit()
+
+
+def get_level_structure():
+    return list(os.walk('riddle/game'))
