@@ -7,7 +7,7 @@ from flask import session
 from riddle.utils import create_user
 
 
-entry_text = '''<h1>Level 1: testlevel</h1>
+entry_text = '''<h1>Level 2: testlevel-2</h1>
 This is what you see when the user accesses the level.
 
 Now, other things must be done: once you show the level, you need to give some

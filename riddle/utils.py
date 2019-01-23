@@ -18,5 +18,13 @@ def update_user_progress(user_id, level):
     db.commit()
 
 
+def get_level_files():
+    root = Path(__file__).parent / 'game'
+    return root, root.glob('**/*.py')
+
+
 def get_level_structure():
-    return list(os.walk('riddle/game'))
+    """Return the levels of the game in hierarchy."""
+    root, files = get_level_files()
+    return [str((fp.parent / fp.stem).relative_to(root))
+            for fp in files]

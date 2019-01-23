@@ -33,12 +33,18 @@ def create_app():
 
     app.before_request(level_access_verification)
 
-    levels = pathlib.Path(__file__).parent / 'game'
-    for n in levels.glob('*.py'):
+    root, level_files = utils.get_level_files()
+    for n in level_files:
         try:
-            app.logger.info(f"Registering module {n.stem}")
-            mod = importlib.import_module('.' + n.stem, 'riddle.game')
-            app.route('/' + n.stem)(mod.entry)
+            name = n.relative_to(root).parent / n.stem
+            app.logger.debug(f"Processing riddle file {name}")
+            mod_name = str('.'.join(name.parts))
+            route = '/' + str(name)
+            app.logger.info(f"Registering module {mod_name} with route {route}")
+            mod = importlib.import_module('.' + mod_name, 'riddle.game')
+            app.route(route, endpoint=mod_name)(mod.entry)
+        except AttributeError:
+            app.logger.warning(f"Riddle {n} is missing entry point.")
         except Exception as e:
             app.logger.exception(f"Unable to load module {n}: {e}")
 
