@@ -18,6 +18,13 @@ def update_user_progress(user_id, level):
     db.commit()
 
 
+def query_user_process(user_id):
+    db = database.get_connection()
+    db.execute(
+        'SELECT user_id, level FROM progress WHERE user_id=?',
+        [user_id])
+
+
 def get_level_files():
     root = Path(__file__).parent / 'game'
     return root, root.glob('**/*.py')
@@ -28,3 +35,8 @@ def get_level_structure():
     root, files = get_level_files()
     return [str((fp.parent / fp.stem).relative_to(root))
             for fp in files]
+
+
+def is_user_allowed(level, solved):
+    """Given a list of solved riddles, return True if user can access level."""
+    return False

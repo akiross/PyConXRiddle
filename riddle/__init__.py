@@ -6,6 +6,7 @@ from flask import Flask, session, request
 
 from riddle import database
 from riddle import cli
+from riddle import utils
 
 from riddle.utils import create_user, get_level_structure
 
@@ -16,11 +17,15 @@ def page_not_found(err):
 
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
-    print("Request is", request.path)
-    print("Level structure is", get_level_structure())
-    #if session.get('user_id') is None:
-    #    session['user_id'] = create_user()
-    #    return "Sorry but you cannot ahahah"
+    if session.get('user_id') is None:
+        # Create a session if none was started yet
+        session['user_id'] = create_user()
+    # Ensure requested URL can be read
+    accessed = request.path[1:]
+    levels = get_level_structure()
+    if accessed not in levels:
+        return None  # Let this be handled by a 404
+    print("USER PROGRESS:", utils.query_user_process(session['user_id']))
 
 
 def create_app():
