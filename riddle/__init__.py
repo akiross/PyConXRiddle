@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import functools
 import importlib
 
 from flask import Flask, session, request
@@ -28,6 +29,26 @@ def level_access_verification():
     print("USER PROGRESS:", utils.query_user_process(session['user_id']))
 
 
+def entry_point(func):
+    """Decorator for the riddle entry points.
+
+    Take cares of marking a riddle as solved when the second return
+    value of func is True.
+    """
+    @functools.wraps(func)
+    def func_(*args, **kwargs):
+        accessed = request.path[1:]
+        # Functions must return two values: response and riddle solved status
+        resp, solved = func(*args, **kwargs)
+        if not solved:
+            return resp
+        # Mark riddle as solved
+        utils.update_user_progress(session['user_id'], accessed)
+        return resp
+
+    return func_
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_envvar('RIDDLE_CONFIG')
@@ -47,7 +68,7 @@ def create_app():
             route = '/' + str(name)
             app.logger.info(f"Registering module {mod_name} with route {route}")
             mod = importlib.import_module('.' + mod_name, 'riddle.game')
-            app.route(route, endpoint=mod_name)(mod.entry)
+            app.add_url_rule(route, mod_name, entry_point(mod.entry))
         except AttributeError:
             app.logger.warning(f"Riddle {n} is missing entry point.")
         except Exception as e:

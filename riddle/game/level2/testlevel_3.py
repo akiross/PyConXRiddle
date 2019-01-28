@@ -28,10 +28,10 @@ fail_text = '''I am sorry, but this is not correct... Try again, please!'''
 def entry():
     if session.get('user_id') is None:
         session['user_id'] = create_user()
-    return f'{entry_text}\n Your user_id is {session["user_id"]}'
+    return f'{entry_text}\n Your user_id is {session["user_id"]}', False
 
 
 def verify():
     if random.random() < 0.25:
-        return success_text
-    return fail_text
+        return success_text, True
+    return fail_text, False
