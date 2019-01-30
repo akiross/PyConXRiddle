@@ -9,7 +9,7 @@ from riddle import database
 from riddle import cli
 from riddle import utils
 
-from riddle.utils import create_user, get_level_structure
+from riddle.utils import create_user, get_level_structure, is_user_allowed
 
 
 def page_not_found(err):
@@ -26,7 +26,12 @@ def level_access_verification():
     levels = get_level_structure()
     if accessed not in levels:
         return None  # Let this be handled by a 404
-    print("USER PROGRESS:", utils.query_user_process(session['user_id']))
+    # Query user progress and check permissions
+    progress = utils.query_user_process(session['user_id'])
+    user_allowed = is_user_allowed(accessed, progress)
+    if not user_allowed:
+        return page_not_found(None)  # Pretend the page is missing
+    return None  # Proceed as usual
 
 
 def entry_point(func):
@@ -43,6 +48,7 @@ def entry_point(func):
         if not solved:
             return resp
         # Mark riddle as solved
+        logging.info(f"User solved the riddle {accessed}") # Not idiomatic FIXME
         utils.update_user_progress(session['user_id'], accessed)
         return resp
 
@@ -53,7 +59,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_envvar('RIDDLE_CONFIG')
 
+    # Register default error handlers
+    # TODO custom error handlers shall be in riddle.game.__init__
     app.register_error_handler(404, page_not_found)
+
     app.teardown_appcontext(database.close_connection)
     app.cli.add_command(cli.init_db)
 
@@ -66,8 +75,8 @@ def create_app():
             app.logger.debug(f"Processing riddle file {name}")
             mod_name = str('.'.join(name.parts))
             route = '/' + str(name)
-            app.logger.info(f"Registering module {mod_name} with route {route}")
             mod = importlib.import_module('.' + mod_name, 'riddle.game')
+            app.logger.info(f"Registering module {mod_name} with route {route}")
             app.add_url_rule(route, mod_name, entry_point(mod.entry))
         except AttributeError:
             app.logger.warning(f"Riddle {n} is missing entry point.")

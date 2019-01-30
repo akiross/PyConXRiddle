@@ -111,7 +111,10 @@ def is_user_allowed(level, solved):
     req = set(level_prerequisites(level))
     if not req:
         return True  # No prereq, yay!
-    solved = set(solved)
+    if solved is None:
+        solved = set()
+    else:
+        solved = set(solved)
     remaining = req - solved
     # If nothing remains, user can proceed
     return len(remaining) == 0
