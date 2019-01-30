@@ -20,9 +20,12 @@ def update_user_progress(user_id, level):
 
 def query_user_process(user_id):
     db = database.get_connection()
-    db.execute(
-        'SELECT user_id, level FROM progress WHERE user_id=?',
-        [user_id])
+    if user_id is None:
+        res = db.execute('SELECT user_id, level FROM progress')
+    else:
+        res = db.execute('SELECT user_id, level FROM progress WHERE user_id=?',
+                         [user_id])
+    yield from ((r['user_id'], r['level']) for r in res)
 
 
 def get_level_files():

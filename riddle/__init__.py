@@ -16,6 +16,10 @@ def page_not_found(err):
     return "Apparently, someone did a mistake.", 404
 
 
+def user_not_allowed(err):
+    return "You can't touch this.", 403
+
+
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
     if session.get('user_id') is None:
@@ -30,7 +34,7 @@ def level_access_verification():
     progress = utils.query_user_process(session['user_id'])
     user_allowed = is_user_allowed(accessed, progress)
     if not user_allowed:
-        return page_not_found(None)  # Pretend the page is missing
+        return user_not_allowed(None)
     return None  # Proceed as usual
 
 
