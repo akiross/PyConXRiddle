@@ -2,12 +2,15 @@
 
 import random
 
+from jinja2 import Template
 from flask import session
 
-from riddle.utils import create_user
+from riddle.utils import create_user, get_user
 
 
-entry_text = '''This is what you see when the user accesses the level.
+entry_text = '''
+<h1>Welcome, user {{user.name}}</h1>
+This is what you see when the user accesses the level.
 
 Now, other things must be done: once you show the level, you need to give some
 hints to the user. For example, the hint to solve this riddle is that the user
@@ -26,8 +29,13 @@ fail_text = '''I am sorry, but this is not correct... Try again, please!'''
 
 def entry():
     if session.get('user_id') is None:
-        session['user_id'] = create_user()
-    return f'{entry_text}\n Your user_id is {session["user_id"]}'
+        print("CREATING USER")
+        session['user_id'] = create_user()  # TODO store the user here
+
+    print("Retrieving user", session['user_id'])
+    user = get_user(session['user_id'])
+    print("GOT USER", user)
+    return Template(entry_text).render(user=user) # f'{entry_text}\n Your user_id is {session["user_id"]}'
 
 
 def verify():
