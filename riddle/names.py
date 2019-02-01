@@ -1,4 +1,5 @@
 import random
+import itertools
 
 
 # Using list(set()) to avoid duplicates and allow indexing
@@ -72,3 +73,15 @@ def random_animal(sep='_'):
     second = random.choice(_adjectives)
     third = random.choice(_animals)
     return f"{first}{sep}the{sep}{second}{sep}{third}"
+
+
+def generate_random_animal(sep='_'):
+    nam = list(range(len(_names)))
+    adj = list(range(len(_adjectives)))
+    ani = list(range(len(_animals)))
+
+    for i, j, k in itertools.product(nam, adj, ani):
+        first = _names[i]
+        second = _adjectives[j]
+        third = _animals[k]
+        yield f"{first}{sep}the{sep}{second}{sep}{third}"

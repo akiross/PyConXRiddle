@@ -2,22 +2,20 @@ import os
 import sqlite3
 from riddle import database
 from pathlib import Path
-from riddle.names import random_animal
+from riddle.names import random_animal, generate_random_animal
 
 
 def create_user():
     db = database.get_connection()
-    # FIXME this is not great: we could list created users and search for
-    # a non-existing one among all possible (shuffled) options
-    for _ in range(1000):  # Try 1000 times, just to avoid a deadlock
+    # Generate all possible names in random order
+    for name in generate_random_animal(sep='-'):
         try:
-            name = random_animal()
             cur = db.execute('INSERT INTO user (name) VALUES (?)',
                              [name])
             db.commit()
             return cur.lastrowid
         except sqlite3.IntegrityError:
-            pass  # Retry
+            pass  # Retry with next name
     return None
 
 
