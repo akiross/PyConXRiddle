@@ -9,8 +9,6 @@ from riddle import database
 from riddle import cli
 from riddle import utils
 
-from riddle.utils import create_user, get_level_structure, is_user_allowed
-
 
 def page_not_found(err):
     return "Apparently, someone did a mistake.", 404
@@ -22,17 +20,23 @@ def user_not_allowed(err):
 
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
+    # Create a session if none was started yet
     if session.get('user_id') is None:
-        # Create a session if none was started yet
-        session['user_id'] = create_user()
+        session['user_id'] = utils.create_user()
+
+    # If user does not exist, create a new one
+    user = utils.get_user(session['user_id'])
+    if user is None:
+        session['user_id'] = utils.create_user()
+
     # Ensure requested URL can be read
     accessed = request.path[1:]
-    levels = get_level_structure()
+    levels = utils.get_level_structure()
     if accessed not in levels:
         return None  # Let this be handled by a 404
     # Query user progress and check permissions
-    progress = utils.query_user_process(session['user_id'])
-    user_allowed = is_user_allowed(accessed, progress)
+    progress = utils.query_user_progress(session['user_id'])
+    user_allowed = utils.is_user_allowed(accessed, progress)
     if not user_allowed:
         return user_not_allowed(None)
     return None  # Proceed as usual

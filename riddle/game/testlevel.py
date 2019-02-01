@@ -2,12 +2,14 @@
 
 import random
 
+from jinja2 import Template
 from flask import session, request
 
-# from riddle.utils import create_user
+from riddle.utils import create_user, get_user
 
 
 entry_text = '''<h1>Level 1: testlevel</h1>
+<h2>Welcome, user {{user.name}} (id {{user.id}})</h2>
 This is what you see when the user accesses the level.
 
 Now, other things must be done: once you show the level, you need to give some
@@ -34,9 +36,10 @@ fail_text = '''I am sorry, but this is not correct... Try again, please!'''
 def entry():
     if 'answer' in request.args:
         return verify(request.args.get('answer'))
-    #if session.get('user_id') is None:
-    #    session['user_id'] = create_user()
-    return f'{entry_text}\n Your user_id is {session["user_id"]}', False
+
+    user = get_user(session['user_id'])
+    return Template(entry_text).render(user=user), False
+    # return f'{entry_text}\n Your user_id is {session["user_id"]}', False
 
 
 def verify(ans):

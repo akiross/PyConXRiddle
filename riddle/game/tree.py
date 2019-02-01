@@ -1,5 +1,5 @@
 from jinja2 import Template
-from riddle.utils import get_level_structure, query_user_process
+from riddle.utils import get_level_structure, query_user_progress
 
 
 template = r"""
@@ -50,7 +50,7 @@ def user_progress():
     # Prepare data to be visualized
     levels = dict()  # Dict level -> {user solved}
     users = set()  # Set of users
-    for user_id, solved_level in query_user_process(None):
+    for user_id, solved_level in query_user_progress(None):
         users.add(user_id)
         levels.setdefault(solved_level, set()).add(user_id)
 
