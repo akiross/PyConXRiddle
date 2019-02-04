@@ -11,6 +11,7 @@ from riddle import utils
 
 from riddle.utils import create_user, get_level_structure, is_user_allowed
 
+__version__ = '0.1.0'
 
 def page_not_found(err):
     return "Apparently, someone did a mistake.", 404
