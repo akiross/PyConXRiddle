@@ -83,3 +83,11 @@ for production this one:
 `gunicorn -w {worker_number} -b {host}:{port} 'riddle:create_app()'`
 
 (obviusly you need to replace the placeholders with the correct values)
+
+
+## Development
+
+This project uses `pipenv` to manage dependencies and virtual environments but requriments files are also provided, in order to keep them updated every time you add a dependency with pipenv please also run one of these commands:
+
+- developenment dependencies `pipenv lock -d -r > requirements-dev.txt`
+- normal dependencies `pipenv lock -r > requirements.txt`
