@@ -75,13 +75,24 @@ def random_animal(sep='_'):
     return f"{first}{sep}the{sep}{second}{sep}{third}"
 
 
-def generate_random_animal(sep='_'):
-    nam = list(range(len(_names)))
-    adj = list(range(len(_adjectives)))
-    ani = list(range(len(_animals)))
+def generate_random_seq(n, chunk=1000):
+    """Generate all the numbers in [0,n)"""
+    # Generate chunks of numbers
+    nums = []
+    for i in range(n):
+        if len(nums) < chunk:
+            nums.append(i)
+        else:
+            random.shuffle(nums)
+            yield from (i for i in nums)
+            nums = []
+    random.shuffle(nums)
+    yield from (i for i in nums)
 
-    for i, j, k in itertools.product(nam, adj, ani):
-        first = _names[i]
-        second = _adjectives[j]
-        third = _animals[k]
+
+def generate_random_animal(sep='_'):
+    while True:
+        first = random.sample(_names, 1)[0]
+        second = random.sample(_adjectives, 1)[0]
+        third = random.sample(_animals, 1)[0]
         yield f"{first}{sep}the{sep}{second}{sep}{third}"
