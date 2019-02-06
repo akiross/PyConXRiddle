@@ -4,14 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
+bumpversion = "*"
+ipython = "*"
+flake8 = "*"
+pytest = "*"
 
 [packages]
 flask = "*"
-pytest = "*"
 gunicorn = "*"
-flake8 = "*"
 python-dotenv = "*"
-ipython = "*"
 
 [requires]
 python_version = "3.7"
