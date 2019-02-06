@@ -9,6 +9,7 @@ from riddle import database
 from riddle import cli
 from riddle import utils
 
+__version__ = '0.2.0-dev'
 
 def page_not_found(err):
     return "Apparently, someone did a mistake.", 404
@@ -20,10 +21,6 @@ def user_not_allowed(err):
 
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
-    # Create a session if none was started yet
-    if session.get('user_id') is None:
-        session['user_id'] = utils.create_user()
-
     # If user does not exist, create a new one
     user = utils.get_user(session['user_id'])
     if user is None:
