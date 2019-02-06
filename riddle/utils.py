@@ -7,7 +7,7 @@ from riddle.names import random_animal, generate_random_animal
 
 def create_user():
     db = database.get_connection()
-    # Generate all possible names in random order
+    # Generate random names
     for name in generate_random_animal(sep='-'):
         try:
             cur = db.execute('INSERT INTO user (name) VALUES (?)',
@@ -24,16 +24,18 @@ def get_user(user_id):
     cur = db.execute('SELECT * FROM user WHERE id = ?',
                      [user_id])
     db.commit()
-    # TODO what happens if none is found?
-    return cur.fetchone()
+    return cur.fetchone()  # Returns user or None
 
 
 def update_user_progress(user_id, level):
     db = database.get_connection()
-    db.execute(
-        'INSERT INTO progress (user_id, level) values(?,?)',
-        [user_id, level])
-    db.commit()
+    try:
+        db.execute(
+            'INSERT INTO progress (user_id, level) values(?,?)',
+            [user_id, level])
+        db.commit()
+    except sqlite3.IntegrityError:
+        pass  # Progress was already stored
 
 
 def query_user_progress(user_id):

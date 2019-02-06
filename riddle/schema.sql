@@ -9,9 +9,9 @@ CREATE TABLE user (
 );
 
 CREATE TABLE progress (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   level TEXT NOT NULL,
+  PRIMARY KEY(user_id, level),
   FOREIGN KEY (user_id) REFERENCES user (id)
 );
