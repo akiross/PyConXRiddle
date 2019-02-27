@@ -1,5 +1,4 @@
 import logging
-import pathlib
 import functools
 import importlib
 
@@ -10,6 +9,7 @@ from riddle import cli
 from riddle import utils
 
 __version__ = '0.2.0-dev'
+
 
 def page_not_found(err):
     return "Apparently, someone did a mistake.", 404
@@ -22,7 +22,7 @@ def user_not_allowed(err):
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
     # If user does not exist, create a new one
-    user = utils.get_user(session['user_id'])
+    user = session.get('user_id')
     if user is None:
         session['user_id'] = utils.create_user()
 
@@ -79,10 +79,15 @@ def create_app():
             name = n.relative_to(root).parent / n.stem
             app.logger.debug(f"Processing riddle file {name}")
             mod_name = str('.'.join(name.parts))
-            route = '/' + str(name)
             mod = importlib.import_module('.' + mod_name, 'riddle.game')
-            app.logger.info(f"Registering module {mod_name} with route {route}")
-            app.add_url_rule(route, mod_name, entry_point(mod.entry))
+            # Each entry point might have multiple associated rules
+            for rule, options in utils.get_level_route(mod_name, mod.entry):
+                app.logger.info(f"Registering module {mod_name} with route {rule}")
+                # Use module name as default endpoint
+                if 'endpoint' not in options:
+                    options['endpoint'] = mod_name
+                options['view_func'] = entry_point(mod.entry)
+                app.add_url_rule(rule, **options)
         except AttributeError:
             app.logger.warning(f"Riddle {n} is missing entry point.")
         except Exception as e:

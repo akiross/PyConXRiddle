@@ -1,7 +1,7 @@
 import os
 import sqlite3
-from riddle import database
 from pathlib import Path
+from riddle import database
 from riddle.names import random_animal, generate_random_animal
 
 
@@ -58,6 +58,15 @@ def get_level_structure():
     root, files = get_level_files()
     return [str((fp.parent / fp.stem).relative_to(root))
             for fp in files]
+
+
+def get_level_route(name, entry_point):
+    """Given the path of the level and the entry_point, return its route."""
+    if hasattr(entry_point, 'route'):
+        # Call routes that are callable
+        return [(r(name) if callable(r) else r, d)
+                for r, d in entry_point.route]
+    return [(f'/{name}', {})]  # Default route for undecorated entry points
 
 
 def level_structure_dict():
