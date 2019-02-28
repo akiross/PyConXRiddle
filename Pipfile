@@ -13,6 +13,7 @@ pytest = "*"
 flask = "*"
 gunicorn = "*"
 python-dotenv = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"

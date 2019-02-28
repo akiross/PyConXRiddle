@@ -1,24 +1,69 @@
 """This module contains (en|de)cryption tools for the game."""
 
 
-def caesar(s: str, n: int) -> str:
+def _get_alphabets(alphabet):
+    if callable(alphabet):
+        a = alphabet()
+    else:
+        a = (alphabet,)
+    l = len(a[0])
+    # Ensure all alphabets have the same length
+    assert all(len(s) == l for s in a)
+    return a, l
+
+
+def e26_alphabet():
+    """26 characters English alphabets, lower and upper cases."""
+    a = ''.join(map(chr, range(ord('a'), ord('z') + 1)))
+    A = ''.join(map(chr, range(ord('A'), ord('Z') + 1)))
+    # We return 2 equivalent alphabet
+    return a, A
+
+
+def sym_alphabet():
+    """Common symbols, number and English letter alphabet."""
+    s = '.,:;<>()[]{}\'"`-_=+*/%\\'
+    n = '0123456789'
+    l = ''.join(map(chr, range(ord('a'), ord('z') + 1)))
+    u = ''.join(map(chr, range(ord('A'), ord('Z') + 1)))
+    # We return a single alphabet
+    return (n + l + u + s,)
+
+
+def caesar(s: str, n: int, alphabet=e26_alphabet) -> str:
     """Rotate the alphabet used in a string by a given amount n.
     
-    The alphabet being rotated is the 26 letters English alphabet.
-    n will be taken in modulo 26.
-    Any character that is outside the range [a-zA-Z] is left unchanged.
+    By default, the alphabet being rotated is the 26 letters
+    English alphabet.
+    n will be taken in modulo len(alphabet).
+    Any character that is outside the alphabet is left unchanged.
+
+    The parameter alphabet can be used to specify a different
+    alphabet. It must be a single string or a callable returning
+    a tuple of strings containing one or more alphabet with
+    same length.
     """
 
-    n = n % 26
-    a = ''.join(map(chr, range(ord('a'), ord('z')+1)))
-    A = ''.join(map(chr, range(ord('A'), ord('Z')+1)))
-    t = str.maketrans(a + A, a[n:] + a[:n] + A[n:] + A[:n])
+    a, l = _get_alphabets(alphabet)
+    # Ensure n is in a valid range
+    n = n % l
+    # Unrotated version of each alphabet
+    u = ''.join(a)
+    # Rotated version of each alphabet
+    r = ''.join([s[n:] + s[:n] for s in a])
+    t = str.maketrans(u, r)
+    # t = str.maketrans(a + A, a[n:] + a[:n] + A[n:] + A[:n])
     return s.translate(t)
 
 
 def rot13(s: str):
     """Rotate the alphabet of a string by 13."""
-    return caesar(s, 13)
+    return caesar(s, 13, e26_alphabet)
+
+
+def vigenere(s: str, k: str, alphabet=e26_alphabet) -> str:
+    """Compute the Vigenère cipher for a string s with key k."""
+    return s
 
 
 def ca1D_step(l: '[0,1,0,1] or "0101"', rule: range(256), boundary) -> list:
@@ -129,3 +174,33 @@ def cantor_position(n):
     if r % 2 == 0:
         return r - c, c
     return c, r - c
+
+
+def dumb_primality_test(n):
+    """Return True if n is prime, False otherwise."""
+    for i in range(2, n // 2 + 1):
+        if n % i == 0:
+            return False
+    return True
+
+
+def sieve_of_eratosthenes(n):
+    """Return the list of primes not greater of n."""
+    primes = [True] * n
+    i, sqrtn = 2, n ** 0.5
+    while i < sqrtn:
+        if primes[i]:
+            for j in range(i * i, n, i):
+                primes[j] = False
+        i += 1
+    return [i for i, v in enumerate(primes[2:], 2) if v]
+
+
+def prime_generator():
+    """Generate prime numbers forever and ever until your computer explodes."""
+    p = 2
+    yield p
+    while True:
+        p += 1
+        if dumb_primality_test(p):  # SLOW!
+            yield p
