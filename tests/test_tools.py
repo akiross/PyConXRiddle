@@ -138,3 +138,19 @@ def test_prime_generator():
     primes = tools.sieve_of_eratosthenes(n)
     for i, p in zip(tools.prime_generator(), primes):
         assert i == p
+
+
+@pytest.mark.parametrize('value,expansion', [
+    ((0, 3), (0, 0, 0)),
+    ((1, 3), (0, 0, 1)),
+    ((2, 3), (0, 1, 0)),
+    ((3, 3), (0, 1, 1)),
+    ((4, 3), (1, 0, 0)),
+    ((5, 3), (1, 0, 1)),
+    ((6, 3), (1, 1, 0)),
+    ((7, 3), (1, 1, 1)),
+    ((7, 4), (0, 1, 1, 1)),
+    ((9, 4), (1, 0, 0, 1)),
+])
+def test_bits_to_tuple(value, expansion):
+    assert tools.bits_to_tuple(*value) == expansion
