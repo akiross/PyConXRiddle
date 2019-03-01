@@ -1,5 +1,9 @@
 """This module contains (en|de)cryption tools for the game."""
 
+# import numpy as np
+from PIL import Image
+from textwrap import dedent
+
 
 def _get_alphabets(alphabet):
     if callable(alphabet):
@@ -204,3 +208,67 @@ def prime_generator():
         p += 1
         if dumb_primality_test(p):  # SLOW!
             yield p
+
+
+def bits_to_tuple(b, n):
+    """Convert the bit into a tuple with given size."""
+    assert b in range(2 ** n)
+    v = []
+    for i in range(n):
+        v.insert(0, b >> i & 1)
+    return tuple(v)
+
+
+def bit3_to_rgb(b):
+    return tuple(i * 0xff for i in bits_to_tuple(b, 3))
+
+
+def draw_subpixel_text(s: str):
+    # Encoding found here: http://www.msarnoff.org/millitext/
+    encodings3 = {
+        '0': '75557', '1': '62227', '2': '71747', '3': '71717', '4': '74717',
+        '5': '74757', '6': '74757', '7': '75111', '8': '75757', '9': '75717',
+        'A': '75755', 'B': '65656', 'C': '74447', 'D': '65556', 'E': '74747',
+        'F': '74744', 'G': '74557', 'H': '55755', 'I': '72227', 'J': '11117',
+        'K': '55655', 'L': '44447', 'M': '57755', 'N': '65555', 'O': '25552',
+        'P': '65644', 'Q': '25573', 'R': '65655', 'S': '34216', 'T': '72222',
+        'U': '55557', 'V': '55531', 'W': '55775', 'X': '55255', 'Y': '55111',
+        'Z': '71247', ' ': '00000', '.': '00033', "'": '22000', '"': '33000',
+        '!': '34404', '?': '31202',
+        ',': '000012',
+    }
+
+    def _tupleize(c):
+        return map(bit3_to_rgb, map(int, encodings3.get(c.upper(), '')))
+
+    def _render(text, surface):
+        for i, c in enumerate(text):
+            rows = _tupleize(c)
+            for j, row in enumerate(_tupleize(c)):
+                surface.putpixel((i*2, j), row)
+            # draw_on_image(rows, x=some_shift)
+
+    rows = []
+    max_w = 0
+    for line in s.split('\n'):
+        w = len(line) * 2
+        max_w = max(w, max_w)
+        # Each row is 6 pixels tall (5+margin) and wide 1px per letter + margin
+        row = Image.new('RGB', (w, 6))
+        _render(line, row)
+        rows.append(row)
+
+    # Compose the rows stacking them vertically
+    full = Image.new('RGB', (max_w + 1, 7 * len(rows)))
+    for i, row in enumerate(rows):
+        full.paste(row, (1, i * 7))
+    return full
+
+
+if __name__ == '__main__':
+    text = dedent('''\
+        "The quick brown fox jumps over the lazy dog"
+        is a typical sentence used to test fonts as it contains all the 26
+        English letters, but in our case, we need to test "points" as well!
+        What d'ya think?''')
+    draw_subpixel_text(text).save('prova.png')
