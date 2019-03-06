@@ -32,6 +32,19 @@ def test_caesar(shift, input_string, expected):
         assert tools.rot13(input_string) == expected
 
 
+@pytest.mark.parametrize('alphabet,shift,input_string,expected', [
+    ('abc', 0, 'abc', 'abc'),
+    ('abc', 1, 'abc', 'bca'),
+    ('abc', 2, 'abc', 'cab'),
+    ('abc', 3, 'abc', 'abc'),
+])
+def test_caesar_sym(alphabet, shift, input_string, expected):
+    # Test string alphabet
+    assert tools.caesar(input_string, shift, alphabet) == expected
+    # Test callable alphabet
+    assert tools.caesar(input_string, shift, lambda: (alphabet,)) == expected
+
+
 @pytest.mark.parametrize('bits_list,rule,boundary,expected', [
     # TODO test exception is raised with invalid values
     # test invalid boundary
@@ -105,3 +118,39 @@ def test_cantor_enum():
 
     for i, pos in zip(range(100), tools.cantor_generate()):
         assert tools.cantor_position(i) == pos
+
+
+def test_dumb_primality_test():
+    primes_under_100 = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+                        53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    putative_primes = [i for i in range(2, 101) if tools.dumb_primality_test(i)]
+    assert primes_under_100 == putative_primes
+
+
+def test_sieve_of_eratosthenes():
+    n = 10
+    prime_list = [i for i in range(2, n+1) if tools.dumb_primality_test(i)]
+    assert tools.sieve_of_eratosthenes(n) == prime_list
+
+
+def test_prime_generator():
+    n = 100
+    primes = tools.sieve_of_eratosthenes(n)
+    for i, p in zip(tools.prime_generator(), primes):
+        assert i == p
+
+
+@pytest.mark.parametrize('value,expansion', [
+    ((0, 3), (0, 0, 0)),
+    ((1, 3), (0, 0, 1)),
+    ((2, 3), (0, 1, 0)),
+    ((3, 3), (0, 1, 1)),
+    ((4, 3), (1, 0, 0)),
+    ((5, 3), (1, 0, 1)),
+    ((6, 3), (1, 1, 0)),
+    ((7, 3), (1, 1, 1)),
+    ((7, 4), (0, 1, 1, 1)),
+    ((9, 4), (1, 0, 0, 1)),
+])
+def test_bits_to_tuple(value, expansion):
+    assert tools.bits_to_tuple(*value) == expansion
