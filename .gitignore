@@ -105,3 +105,6 @@ venv.bak/
 
 # db
 *.sqlite3
+
+# vs code
+settings.json
