@@ -48,32 +48,57 @@ def query_user_progress(user_id):
     yield from ((r['user_id'], r['level']) for r in res)
 
 
+def is_dunder(stem):
+    if isinstance(stem, Path):
+        stem = stem.stem
+    return stem[:2] == '__' and stem[-2:] == '__'
+
+
 def get_level_files():
     root = Path(__file__).parent / 'game'
     return root, root.glob('**/*.py')
 
 
+def get_level_pathname(fp, root=None):
+    """Given a game file, return its path and name in the game."""
+    if root is None:
+        root, _ = get_level_files()
+    else:
+        root = Path(root)  # Ensure it's a Path
+    fp = Path(fp)
+    path = fp.relative_to(root).parent / fp.stem
+    name = str('.'.join(path.parts))
+    return path, name
+
+
 def get_level_structure():
     """Return the levels of the game in hierarchy."""
     root, files = get_level_files()
-    return [str((fp.parent / fp.stem).relative_to(root))
-            for fp in files]
+    return [get_level_pathname(fp)[0] for fp in files if not is_dunder(fp)]
 
 
-def get_level_route(name, entry_point):
+def get_level_routes(path, entry_point):
     """Given the path of the level and the entry_point, return its route."""
     if hasattr(entry_point, 'route'):
         # Call routes that are callable
-        return [(r(name) if callable(r) else r, d)
-                for r, d in entry_point.route]
-    return [(f'/{name}', {})]  # Default route for undecorated entry points
+        routes = [(r(path) if callable(r) else r, d)
+                  for r, d in entry_point.route]
+    else:
+        routes = [(f'/{path}', {})]  # Default route for undecorated EP
+
+    # Fix endpoints
+    for rule, options in routes:
+        # Use module name as default endpoint
+        if 'endpoint' not in options:
+            options['endpoint'] = str('.'.join(path.parts))
+    return routes
 
 
 def level_structure_dict():
     """Return the levels of the game as nested dictionaries."""
     root = {}
     ls = get_level_structure()
-    for l in (l.split('/') for l in ls):
+    for l in (str(l).split('/') for l in ls):
         cur_tree = root
         for d in l[:-1]:
             cur_tree = cur_tree.setdefault(d, {})
@@ -140,7 +165,7 @@ def level_prerequisites(level):
 def is_user_allowed(level, solved):
     """Given a list of solved riddles, return True if user can access level."""
     # Get prereq for the level
-    req = set(level_prerequisites(level))
+    req = set(level_prerequisites(str(level)))
     if not req:
         return True  # No prereq, yay!
     if solved is None:

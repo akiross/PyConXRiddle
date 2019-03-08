@@ -18,7 +18,7 @@ def add_encoded_route(route, encoder, **options):
     def _deco(entry):
         def _builder(name):
             """Encode name and replace it in route."""
-            return route.format(name=encoder(name))
+            return route.format(name=encoder(str(name)))
         if hasattr(entry, 'route'):
             entry.route.append((_builder, options))
         else:

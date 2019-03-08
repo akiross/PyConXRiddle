@@ -1,5 +1,7 @@
+from pathlib import Path
+from riddle import utils 
+from flask import url_for, current_app
 from jinja2 import Template
-from riddle.utils import get_level_structure, query_user_progress
 
 
 template = r"""
@@ -23,9 +25,9 @@ template = r"""
             </tr>
         </thead>
         <tbody>
-            {% for level, users in levels %}
+            {% for level, rules, users in levels %}
             <tr>
-                <td>{{ level }}</td>
+                <td>{{ level }} ({{ ', '.join(rules) }})</td>
                 {% for user in users %}
                 <td>{{ 'x' if user else '' }}</td>
                 {% endfor %}
@@ -50,16 +52,18 @@ def user_progress():
     # Prepare data to be visualized
     levels = dict()  # Dict level -> {user solved}
     users = set()  # Set of users
-    for user_id, solved_level in query_user_progress(None):
+    for user_id, solved_level in utils.query_user_progress(None):
         users.add(user_id)
         levels.setdefault(solved_level, set()).add(user_id)
 
     # Build table of which user solved which level
     solved = []
     users = sorted(users)  # Sort all users
-    ls = get_level_structure()
-    ls.remove(__name__.split('.')[-1])  # Remove this special module
+    level_map = current_app.config['level_map']  # Map level-rules
+    ls = utils.get_level_structure()
+    ls.remove(utils.get_level_pathname(__file__)[0])  # Remove this special module
+    ls = {str(l) for l in ls}
     for l in ls:
-        solved.append((l, [u in levels.get(l, {}) for u in users]))
+        solved.append((l, level_map[l], [u in levels.get(l, {}) for u in users]))
 
     return tpl.render(users=users, levels=solved)

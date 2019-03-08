@@ -49,7 +49,7 @@ def test_level_structure():
     with mock.patch('riddle.utils.get_level_files') as mockglob:
         mockglob.return_value = Path('riddle/game/'), file_list
         ls = get_level_structure()
-        assert ls == example_levels
+        assert [str(l) for l in ls] == example_levels
 
 
 def test_level_structure_dict():
@@ -177,7 +177,25 @@ def test_user_access():
         for level, solved, expected in cases:
             assert is_user_allowed(level, solved) == expected
 
+    # Ensure dunder files are ignored in the level structure
+    with mock.patch('riddle.utils.get_level_files') as mockfp:
+        mockfp.return_value = Path('/riddle/game'), [
+            Path('/riddle/game/__foo__.py'),
+            Path('/riddle/game/foo/foo.py'),
+            Path('/riddle/game/bar/bar.py'),
+        ]
+
+        cases = [
+            ['foo/foo', [], True],
+            ['bar/bar', [], True],
+            ['foo/foo', ['bar/bar'], True],
+            ['bar/bar', ['foo/foo'], True],
+        ]
+        for level, solved, expected in cases:
+            assert is_user_allowed(level, solved) == expected
+
 
 def test_level_routing():
     for l in example_levels:
-        assert get_level_route(l, lambda: 'foo') == '/' + l
+        print("Level", l)
+        assert get_level_route(l, lambda: 'foo') == [('/' + l, {})]
