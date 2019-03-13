@@ -211,12 +211,17 @@ def prime_generator():
 
 
 def bits_to_tuple(b, n):
-    """Convert the bit into a tuple with given size."""
+    """Convert the number into a tuple with given size."""
     assert b in range(2 ** n)
     v = []
     for i in range(n):
         v.insert(0, b >> i & 1)
     return tuple(v)
+
+
+def tuple_to_bits(b):
+    """Convert a tuple of bits to a number."""
+    return sum(d << i for i, d in enumerate(reversed(b)))
 
 
 def bit3_to_rgb(b):
@@ -265,6 +270,61 @@ def draw_subpixel_text(s: str):
     return full
 
 
+def generate_bits(data: bytes):
+    """Yield the bits into data, one at time, followed by infinite zeros"""
+    for n in data:
+        yield from (b for b in bits_to_tuple(n, 8))
+    while True:
+        yield 0
+
+
+def lsb_writer(byte, bit):
+    return byte & 0b11111110 | bit
+
+
+def lsb_reader(byte):
+    return byte & 0b00000001
+
+
+def make_ith_bit_writer(i):
+    def _writer(byte, bit):
+        return byte & (0xff - (1 << i)) | bit << i
+    return _writer
+
+
+def make_ith_bit_reader(i):
+    def _reader(byte):
+        return (byte & (1 << i)) >> i
+    return _reader
+
+
+def write_to_image_bit(img, data: bytes, bit_writer=lsb_writer):
+    """Write to image the binary data, one bit at time, with zero padded tail.
+    This function does NOT check for lengths and will NOT raise errors; it is
+    caller's responsibility to ensure the message fits the image.
+    """
+    buff = bytearray()
+    for p, d in zip(img.tobytes(), generate_bits(data)):
+        buff.append(bit_writer(p, d))
+    return Image.frombytes(img.mode, img.size, bytes(buff))
+
+
+def read_from_image_bit(img, bit_reader=lsb_reader):
+    """Read data written using write_to_image_lsb."""
+    data = []
+    datum = []
+    for p in img.tobytes():
+        datum.append(bit_reader(p))
+        if len(datum) == 8:
+            data.append(tuple_to_bits(datum))
+            datum.clear()
+    # Do not discard partial bits
+    while len(datum) < 8:
+        datum.append(0)
+    data.append(tuple_to_bits(datum))
+    return bytes(data)
+
+
 if __name__ == '__main__':
     text = dedent('''\
         "The quick brown fox jumps over the lazy dog"
@@ -272,3 +332,11 @@ if __name__ == '__main__':
         English letters, but in our case, we need to test "points" as well!
         What d'ya think?''')
     draw_subpixel_text(text).save('prova.png')
+
+    msb_writer = make_ith_bit_writer(5)
+    msb_reader = make_ith_bit_reader(5)
+
+    img = Image.open("../demo_image.jpg")
+    img2 = write_to_image_bit(img, 'Hello there! ☺'.encode(), msb_writer)
+    img2.show()
+    print(read_from_image_bit(img2, msb_reader).decode())
