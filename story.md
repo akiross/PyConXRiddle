@@ -197,6 +197,10 @@ still be secured! (read on google: secure you kvm machine)
 
 ## Ideas
 
+ - Pretend the WASP10 is a low-quality website and give the user extra-points
+   for fixing it. For example, link a CSS to "htttp://riddle/static/style.css"
+   and tie the true "http://riddle/static/style.css" to a view. If the user
+   accesses the true view, give him extra points for trying.
  - Hack-the-DB: we create purposely exploitable sqlite3 databases, in which
    to inject ad-hoc syntetic data that the user has to retrieve. We can use
    unparsed query strings with executemany and executescript to make it
