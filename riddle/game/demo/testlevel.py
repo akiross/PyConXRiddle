@@ -7,8 +7,11 @@ from flask import session, request
 
 from riddle.utils import create_user, get_user
 
+from . import env
 
-entry_text = '''<h1>Level 1: testlevel</h1>
+
+entry_text = '''{% extends "base" %}
+{% block body %}<h1>Level 1: testlevel</h1>
 <h2>Welcome, user {{user.name}} (id {{user.id}})</h2>
 This is what you see when the user accesses the level.
 
@@ -22,7 +25,7 @@ The most basic thing we can provide, is a field for the answer:
 <form method=GET>
     (Comma separated) <input name="answer"></input>
     <input type="submit" value="Send!"></input>
-</form>
+</form>{% endblock %}
 '''
 
 
@@ -38,7 +41,7 @@ def entry():
         return verify(request.args.get('answer'))
 
     user = get_user(session['user_id'])
-    return Template(entry_text).render(user=user), False
+    return env.from_string(entry_text).render(user=user), False
     # return f'{entry_text}\n Your user_id is {session["user_id"]}', False
 
 
