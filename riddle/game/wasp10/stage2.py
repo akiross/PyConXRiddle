@@ -16,15 +16,13 @@ entry_text = '''{% extends "form" %}
 {% from "global_macros" import open_question, submit_button %}
 {% block stage %}Stage 2{% endblock %}
 {% block form %}
-
+<div>Let's now proceed with some complex math.</div>
 <form>
-{% call open_question("q_math_1") %}Compute 3<sup>38</sup>{% endcall %}
-{% call open_question("q_math_2") %}Given the equation $$y = (log(4 * x + 1) * x) / log(9 * x**2 * e**x)$$ please compute $y$ when $x=42$.{% endcall %}
-{% call open_question("q_math_3") %}Given this list of functions, evaluate{% endcall %}
+{% call open_question("q_math_1") %}Compute the modulo of $4+3j$?{% endcall %}
+{% call open_question("q_math_2") %}Compute $(7+4j)\cdot(17-5j)${% endcall %}
+{% call open_question("q_math_3") %}...{% endcall %}
 {{ submit_button("Send") }}
 </form>
-
-<div><a href="{{ page.next_page }}">Start the Competition!</a></div>
 {% endblock %}
 <
 '''

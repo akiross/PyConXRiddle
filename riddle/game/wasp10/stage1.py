@@ -20,11 +20,9 @@ entry_text = '''{% extends "form" %}
 <form>
 {% call open_question("q_math_1") %}Compute 2<sup>38</sup>{% endcall %}
 {% call open_question("q_math_2") %}Given the equation $$y = (log(4 * x + 1) * x) / log(9 * x**2 * e**x)$$ please compute $y$ when $x=42$.{% endcall %}
-{% call open_question("q_math_3") %}Given this list of functions, evaluate{% endcall %}
+{% call open_question("q_math_3") %}Given this function, evaluate for $x={0, 2, 4, ...}${% endcall %}
 {{ submit_button("Send") }}
 </form>
-
-<div><a href="{{ page.next_page }}">Start the Competition!</a></div>
 {% endblock %}
 <
 '''

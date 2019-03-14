@@ -48,6 +48,14 @@ def query_user_progress(user_id):
     yield from ((r['user_id'], r['level']) for r in res)
 
 
+def set_user_flag(user_id, level, flag, value):
+    pass
+
+
+def get_user_flag(user_id, level, flag, value):
+    pass
+
+
 def is_dunder(stem):
     if isinstance(stem, Path):
         stem = stem.stem
@@ -55,42 +63,43 @@ def is_dunder(stem):
 
 
 def get_level_files():
+    """Return the level file paths and their root, as pathlib.Paths."""
     root = Path(__file__).parent / 'game'
     return root, root.glob('**/*.py')
 
 
-def get_level_pathname(fp, root=None):
-    """Given a game file, return its path and name in the game."""
+def get_level_pathname(fpath, root=None):
+    """Given a game file, return its url-path and name in the game."""
     if root is None:
         root, _ = get_level_files()
     else:
         root = Path(root)  # Ensure it's a Path
-    fp = Path(fp)
-    path = fp.relative_to(root).parent / fp.stem
-    name = str('.'.join(path.parts))
-    return path, name
+    fpath = Path(fpath)
+    upath = fpath.relative_to(root).parent / fpath.stem
+    name = str('.'.join(upath.parts))
+    return upath, name
 
 
 def get_level_structure():
-    """Return the levels of the game in hierarchy."""
+    """Return the url-paths for the levels in the game hierarchy."""
     root, files = get_level_files()
     return [get_level_pathname(fp)[0] for fp in files if not is_dunder(fp)]
 
 
-def get_level_routes(path, entry_point):
-    """Given the path of the level and the entry_point, return its route."""
+def get_level_routes(upath, entry_point):
+    """Given the url-path of the level and the entry_point, return its route."""
     if hasattr(entry_point, 'route'):
         # Call routes that are callable
-        routes = [(r(path) if callable(r) else r, d)
+        routes = [(r(upath) if callable(r) else r, d)
                   for r, d in entry_point.route]
     else:
-        routes = [(f'/{path}', {})]  # Default route for undecorated EP
+        routes = [(f'/{upath}', {})]  # Default route for undecorated EP
 
     # Fix endpoints
     for rule, options in routes:
         # Use module name as default endpoint
         if 'endpoint' not in options:
-            options['endpoint'] = str('.'.join(path.parts))
+            options['endpoint'] = str('.'.join(upath.parts))
     return routes
 
 

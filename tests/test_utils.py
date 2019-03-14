@@ -1,8 +1,16 @@
+import sqlite3
 from pathlib import Path
 from unittest import mock
-from riddle.utils import (get_level_structure, get_level_files,
-    is_user_allowed, strip_common_parents, level_structure_dict,
-    level_prerequisites, get_level_route)
+from riddle import database
+from riddle.utils import get_level_files
+from riddle.utils import is_user_allowed
+from riddle.utils import get_level_routes
+from riddle.utils import get_level_structure
+from riddle.utils import level_prerequisites
+from riddle.utils import query_user_progress
+from riddle.utils import level_structure_dict
+from riddle.utils import strip_common_parents
+from riddle.utils import update_user_progress
 
 
 example_levels = [
@@ -27,10 +35,6 @@ example_levels_2 = [
     'level_2/riddle_3',
     'level_2/level_3/riddle_1',
     'level_2/level_3/riddle_2',
-]
-
-example_entry_points = [
-    'foo'
 ]
 
 
@@ -196,6 +200,57 @@ def test_user_access():
 
 
 def test_level_routing():
-    for l in example_levels:
-        print("Level", l)
-        assert get_level_route(l, lambda: 'foo') == [('/' + l, {})]
+    def _ep():
+        return 'this is the entry point'
+
+    # Ensure that when the (undecorated) entry-point has no route attr, the
+    # returned route is the path plus a standard endpoint
+    for l, p in zip(example_levels, map(Path, example_levels)):
+        endpoint = {'endpoint': '.'.join(p.parts)}
+        assert get_level_routes(p, _ep) == [(f'/{l}', endpoint)]
+
+    # Check that when endpoint is decorated with a value, that value is used
+    # as the URL. If endpoint is missing, a default is used
+    for l, p in zip(example_levels, map(Path, example_levels)):
+        # Set this at every loop so we get a clean state every time
+        _ep.route = [('/this/is/a/upath', {})]
+        endpoint = {'endpoint': '.'.join(p.parts)}
+        assert get_level_routes(p, _ep) == [('/this/is/a/upath', endpoint)]
+
+    # Check that, if the entry point is given, it is used correctly
+    for l, p in zip(example_levels, map(Path, example_levels)):
+        # Set this at every loop so we get a clean state every time
+        _ep.route = [('/this/is/a/upath', {'endpoint': l[:2] + l[-2:]})]
+        endpoint = {'endpoint': l[:2] + l[-2:]}
+        assert get_level_routes(p, _ep) == [('/this/is/a/upath', endpoint)]
+
+    # Check that if route is callable, it is invoked and used
+    for l, p in zip(example_levels, map(Path, example_levels)):
+        # Set this at every loop so we get a clean state every time
+        _ep.route = [(lambda up: up / 'foo', {})]
+        endpoint = {'endpoint': '.'.join(p.parts)}
+        assert get_level_routes(p, _ep) == [(p / 'foo', endpoint)]
+
+    # Check that multiple routes of different nature might be present
+    for l, p in zip(example_levels, map(Path, example_levels)):
+        # Set this at every loop so we get a clean state every time
+        _ep.route = [(lambda up: up / 'foo', {}),
+                     ('/a/upath', {})]
+        endpoint = {'endpoint': '.'.join(p.parts)}
+        assert get_level_routes(p, _ep) == [(p / 'foo', endpoint),
+                                            ('/a/upath', endpoint)]
+
+
+def test_user_progress():
+    # # Create sqlite in memory
+    # with mock.patch('riddle.database.get_connection') as mockconn:
+    #     mockconn.return_value = sqlite3.connect(':memory:')
+    #     database.init()  # Richiede una app
+    #     assert list(query_user_progress('test')) == []
+    #     
+    # # Set it as current config
+    assert False
+
+
+def test_user_flag():
+    assert False
