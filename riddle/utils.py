@@ -45,14 +45,14 @@ def query_user_progress(user_id):
     else:
         res = db.execute('SELECT user_id, level FROM progress WHERE user_id=?',
                          [user_id])
-    yield from ((r['user_id'], r['level']) for r in res)
+    yield from ((r[0], r[1]) for r in res)
 
 
 def set_user_flag(user_id, level, flag, value):
     pass
 
 
-def get_user_flag(user_id, level, flag, value):
+def get_user_flag(user_id, level, flag):
     pass
 
 
