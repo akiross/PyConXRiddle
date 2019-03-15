@@ -31,7 +31,7 @@ def update_user_progress(user_id, level):
     db = database.get_connection()
     try:
         db.execute(
-            'INSERT INTO progress (user_id, level) values(?,?)',
+            'INSERT INTO progress (user_id, level) VALUES (?,?)',
             [user_id, level])
         db.commit()
     except sqlite3.IntegrityError:
@@ -48,12 +48,33 @@ def query_user_progress(user_id):
     yield from ((r[0], r[1]) for r in res)
 
 
-def set_user_flag(user_id, level, flag, value):
-    pass
+def set_user_flag(user_id, flag, value):
+    db = database.get_connection()
+    try:
+        res = db.execute('''INSERT OR REPLACE
+                            INTO user_flag (user_id, flag, value)
+                            VALUES (?,?,?)''', [user_id, flag, value])
+        db.commit()
+    except sqlite3.IntegrityError:
+        pass
 
 
-def get_user_flag(user_id, level, flag):
-    pass
+def unset_user_flag(user_id, flag):
+    db = database.get_connection()
+    try:
+        res = db.execute('''DELETE FROM user_flag
+                            WHERE user_id=? AND level=? AND value=?''',
+                            [user_id, flag, value])
+        db.commit()
+    except sqlite3.IntegrityError:
+        pass
+
+
+def get_user_flag(user_id, flag):
+    db = database.get_connection()
+    res = db.execute('''SELECT user_id, flag, value FROM user_flag
+                        WHERE user_id=? AND flag=?''', [user_id, flag])
+    return res.fetchone()
 
 
 def is_dunder(stem):

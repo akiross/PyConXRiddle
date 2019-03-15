@@ -8,6 +8,7 @@ from riddle.utils import get_user_flag
 from riddle.utils import set_user_flag
 from riddle.utils import get_level_files
 from riddle.utils import is_user_allowed
+from riddle.utils import unset_user_flag
 from riddle.utils import get_level_routes
 from riddle.utils import get_level_structure
 from riddle.utils import level_prerequisites
@@ -297,17 +298,21 @@ def test_user_flag():
         mockconn.return_value = conn
 
         users = ['user0', 'user1']
-        levels = [f'/mock/levels/{i}' for i in range(4)]
+        # levels = [f'/mock/levels/{i}' for i in range(4)]
         flags = [f'flag{i}' for i in range(4)]
         values = [f'value{i}' for i in range(4)]
 
         # Values default to None
-        assert get_user_flag(users[0], levels[0], flags[0]) is None
+        assert get_user_flag(users[0], flags[0]) is None
 
         # Values can be set
-        set_user_flag(users[0], levels[0], flags[0], values[0])
-        assert get_user_flag(users[0], levels[0], flags[0]) == values[0]
+        set_user_flag(users[0], flags[0], values[0])
+        assert get_user_flag(users[0], flags[0]) == values[0]
 
         # Values are updated correctly
-        set_user_flag(users[0], levels[0], flags[0], values[1])
-        assert get_user_flag(users[0], levels[0], flags[0]) == values[1]
+        set_user_flag(users[0], flags[0], values[1])
+        assert get_user_flag(users[0], flags[0]) == values[1]
+
+        # Values can be unset
+        unset_user_flag(users[0], flags[0])
+        assert get_user_flag(users[0], flags[0]) is None

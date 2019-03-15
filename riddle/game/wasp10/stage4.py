@@ -28,7 +28,7 @@ answer incorrectly, you will not be able to continue the challenge.</p>
 </form>
 '''
 
-confirm_text '''{% extends "form" %}
+confirm_text = '''{% extends "form" %}
 <form>
 <p>Your answer is:</p>
 <p>{{ page.answer }}</p>
@@ -43,7 +43,7 @@ def entry():
         'next_page': '/wasp10/stage0',
         'deadline': 'DOMENICA ALLE 9:00',
     }
-    if 'q_final_1' in request.args and :
-        page['answer'] = 
+    if 'q_final_1' in request.args:
+        page['answer'] = 123
         return env.from_string(confirm_text).render(page=page, user=user), False
     return env.from_string(entry_text).render(page=page, user=user), False

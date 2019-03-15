@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS progress;
+DROP TABLE IF EXISTS user_flag;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,6 +13,15 @@ CREATE TABLE progress (
   user_id INTEGER NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   level TEXT NOT NULL,
-  PRIMARY KEY(user_id, level),
+  PRIMARY KEY (user_id, level),
+  FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+CREATE TABLE user_flag (
+  user_id INTEGER NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  flag TEXT NOT NULL,
+  value TEXT NOT NULL,
+  PRIMARY KEY (user_id, flag),
   FOREIGN KEY (user_id) REFERENCES user (id)
 );
