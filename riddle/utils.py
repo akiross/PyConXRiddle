@@ -63,8 +63,8 @@ def unset_user_flag(user_id, flag):
     db = database.get_connection()
     try:
         res = db.execute('''DELETE FROM user_flag
-                            WHERE user_id=? AND level=? AND value=?''',
-                            [user_id, flag, value])
+                            WHERE user_id=? AND flag=?''',
+                            [user_id, flag])
         db.commit()
     except sqlite3.IntegrityError:
         pass
@@ -74,7 +74,10 @@ def get_user_flag(user_id, flag):
     db = database.get_connection()
     res = db.execute('''SELECT user_id, flag, value FROM user_flag
                         WHERE user_id=? AND flag=?''', [user_id, flag])
-    return res.fetchone()
+    res = res.fetchone()
+    if res is not None:
+        return res[2]
+    return None
 
 
 def is_dunder(stem):

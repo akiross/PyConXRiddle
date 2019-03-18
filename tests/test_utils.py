@@ -251,7 +251,7 @@ def test_user_progress():
     with mock.patch('riddle.database.get_connection') as mockconn:
         conn = sqlite3.connect(':memory:')
         conn.executescript(open('riddle/schema.sql', 'rt').read())
-        mockconn.return_value = con
+        mockconn.return_value = conn
 
         users = ['user0', 'user1']
         levels = [f'/mock/levels/{i}' for i in range(4)]
