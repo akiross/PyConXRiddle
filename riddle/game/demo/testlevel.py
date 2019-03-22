@@ -6,6 +6,7 @@ from jinja2 import Template
 from flask import session, request
 
 from riddle.utils import create_user, get_user
+from riddle.urls import on_success
 
 from . import env
 
@@ -36,12 +37,15 @@ you are collecting 2 points.'''
 fail_text = '''I am sorry, but this is not correct... Try again, please!'''
 
 
+# When an answer is given and it is positive (i.e. entry returns (x, True))
+# the server will automatically redirect to the next page 
+@on_success(redirect='/demo/success_level')
 def entry():
     if 'answer' in request.args:
         return verify(request.args.get('answer'))
 
     user = get_user(session['user_id'])
-    return env.from_string(entry_text).render(user=user), False
+    return env.from_string(entry_text).render(user=user),
     # return f'{entry_text}\n Your user_id is {session["user_id"]}', False
 
 

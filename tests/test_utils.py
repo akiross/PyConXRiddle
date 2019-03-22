@@ -260,34 +260,34 @@ def test_user_progress():
 
         # The progress can be added to the database
         update_user_progress(users[0], levels[0])
-        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0])]
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1)]
          
         # Duplicated entries should not occurr
         update_user_progress(users[0], levels[0])
-        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0])]
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1)]
 
         # Multiple entries are ok
         update_user_progress(users[0], levels[1])
-        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0]),
-                                                         (users[0], levels[1])]
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1),
+                                                         (users[0], levels[1], 1)]
 
         # Having multiple users should be no problem
         update_user_progress(users[1], levels[0])
-        update_user_progress(users[1], levels[2])
+        update_user_progress(users[1], levels[2], 2)
         update_user_progress(users[0], levels[3])
-        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0]),
-                                                         (users[0], levels[1]),
-                                                         (users[0], levels[3])]
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1),
+                                                         (users[0], levels[1], 1),
+                                                         (users[0], levels[3], 1)]
 
-        assert sorted(query_user_progress(users[1])) == [(users[1], levels[0]),
-                                                         (users[1], levels[2])]
+        assert sorted(query_user_progress(users[1])) == [(users[1], levels[0], 1),
+                                                         (users[1], levels[2], 2)]
 
         # We should be able to query all users
-        assert sorted(query_user_progress(None)) == [(users[0], levels[0]),
-                                                     (users[0], levels[1]),
-                                                     (users[0], levels[3]),
-                                                     (users[1], levels[0]),
-                                                     (users[1], levels[2])]
+        assert sorted(query_user_progress(None)) == [(users[0], levels[0], 1),
+                                                     (users[0], levels[1], 1),
+                                                     (users[0], levels[3], 1),
+                                                     (users[1], levels[0], 1),
+                                                     (users[1], levels[2], 2)]
 
 
 def test_user_flag():

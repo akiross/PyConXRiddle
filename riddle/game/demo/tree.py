@@ -52,7 +52,7 @@ def user_progress():
     # Prepare data to be visualized
     levels = dict()  # Dict level -> {user solved}
     users = set()  # Set of users
-    for user_id, solved_level in utils.query_user_progress(None):
+    for user_id, solved_level, _ in utils.query_user_progress(None):
         users.add(user_id)
         levels.setdefault(solved_level, set()).add(user_id)
 

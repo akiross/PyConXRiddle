@@ -25,3 +25,28 @@ def add_encoded_route(route, encoder, **options):
             entry.route = [(_builder, options)]
         return entry
     return _deco
+
+
+def on_success(redirect=None, score=1):
+    """Determine what happens on level passed."""
+    def _deco(entry):
+        entry.on_success = (redirect, score)
+        return entry
+    return _deco
+
+
+def on_failure(redirect=None, score=0):
+    """Determine what happens on level failed."""
+    def _deco(entry):
+        entry.on_failure = (redirect, score)
+        return entry
+    return _deco
+
+
+def on_answer(redirect=None, success_score=1, failure_score=0):
+    """Determine what happens when a pass/fail answer is given."""
+    def _deco(entry):
+        entry.on_success = (redirect, success_score)
+        entry.on_failure = (redirect, failure_score)
+        return entry
+    return _deco

@@ -2,7 +2,7 @@ import logging
 import functools
 import importlib
 
-from flask import Flask, session, request
+from flask import Flask, session, request, redirect
 
 from riddle import database
 from riddle import cli
@@ -32,7 +32,7 @@ def level_access_verification():
     if accessed not in levels:
         return None  # Let this be handled by a 404
     # Query user progress and check permissions
-    progress = list(utils.query_user_progress(session['user_id']))
+    progress = list(p[:2] for p in utils.query_user_progress(session['user_id']))
     user_allowed = utils.is_user_allowed(accessed, progress)
     if not user_allowed:
         return user_not_allowed(None)
@@ -42,20 +42,57 @@ def level_access_verification():
 def entry_point(func):
     """Decorator for the riddle entry points.
 
-    Take cares of marking a riddle as solved when the second return
-    value of func is True.
+    Take cares of marking a riddle as solved and adding user score. The entry
+    point shall return a dictionary with these optional keys:
+
+     - content: the content to display
+     - redirect: url of the page to be redirected with a 303
+     - score: how many points to assign the user 
+     - answer: None, 'fail' or 'pass' depending on the answer outcome
+
+    At least one of content and redirect must be provided, but redirect has the
+    precedence over the content rendering.
+    answer can be None, meaning that the page rendering carries no info about
+    user answer, in this case user progress nor score is updated.
+    score defaults to 1 when answer is pass and 0 when fail.
     """
     @functools.wraps(func)
     def func_(*args, **kwargs):
         accessed = request.path[1:]
-        # Functions must return two values: response and riddle solved status
-        resp, solved = func(*args, **kwargs)
-        if not solved:
-            return resp
-        # Mark riddle as solved
-        logging.info(f"User solved the riddle {accessed}") # Not idiomatic FIXME
-        utils.update_user_progress(session['user_id'], accessed)
-        return resp
+        
+        # No pass/fail flags by default
+        pf_flags = None
+        target = None
+
+        # Functions must return a dictionary
+        resp = func(*args, **kwargs)
+        answer_given = 'answer' in resp
+        if answer_given:
+            # An answer was given, get pass/fail flags
+            if resp['answer'] == 'pass':
+                if hasattr(func, 'on_success'):
+                    target, score = getattr(func, 'on_success')
+                else:
+                    score = 1
+            elif resp['answer'] == 'fail':
+                if hasattr(func, 'on_failure'):
+                    target, score = getattr(func, 'on_failure')
+                else:
+                    score = 0
+        
+        # Overrides
+        if 'score' in resp:
+            score = resp['score']
+        if 'redirect' in resp:
+            target = resp['redirect']
+
+        # If answer was given, save progress
+        if answer_given:
+            utils.update_user_progress(session['user_id'], accessed, score)
+        # Redirect if necessary
+        if target:
+            return redirect(target, code=303)
+        return resp['content']
 
     return func_
 
