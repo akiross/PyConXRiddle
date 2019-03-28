@@ -114,7 +114,7 @@ def make_entry_point(stage, questions, on_answer):
                     answers[i] = question(answer)
             # Return 
             return {
-                'score': sum(a == True for a in answers),
+                'score': sum(bool(a) for a in answers),
                 'answer': 'pass',  # Consider the stage solved
             }
         else:

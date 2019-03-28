@@ -26,7 +26,7 @@ def get_user(user_id):
     db.commit()
     user = cur.fetchone()  # Returns user or None
     if user is not None:
-        return tuple(user)
+        return dict(user)
     return None
 
 

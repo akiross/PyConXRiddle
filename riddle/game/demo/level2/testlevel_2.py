@@ -18,20 +18,9 @@ After the hint we will need a way to check the results.
 '''
 
 
-success_text = '''Congratulations, you did it! That was the right answer, and
-you are collecting 2 points.'''
-
-
-fail_text = '''I am sorry, but this is not correct... Try again, please!'''
-
-
 def entry():
     if session.get('user_id') is None:
         session['user_id'] = create_user()
-    return f'{entry_text}\n Your user_id is {session["user_id"]}', False
-
-
-def verify():
-    if random.random() < 0.25:
-        return success_text, True
-    return fail_text, False
+    return {
+        'content': f'{entry_text}\n Your user_id is {session["user_id"]}',
+    }

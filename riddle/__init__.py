@@ -69,16 +69,18 @@ def entry_point(func):
         answer_given = 'answer' in resp
         if answer_given:
             # An answer was given, get pass/fail flags
-            if resp['answer'] == 'pass':
+            if resp['answer'] in ['pass', True, 1]:
                 if hasattr(func, 'on_success'):
                     target, score = getattr(func, 'on_success')
                 else:
                     score = 1
-            elif resp['answer'] == 'fail':
+            elif resp['answer'] in ['fail', False, 0]:
                 if hasattr(func, 'on_failure'):
                     target, score = getattr(func, 'on_failure')
                 else:
                     score = 0
+            else:
+                raise ValueError("Answer should be pass or fail")
         
         # Overrides
         if 'score' in resp:
