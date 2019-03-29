@@ -10,5 +10,5 @@ def entry():
     session['user_id'] = uid
     return {
         'content': f"<p>Aight! Yer criminal record be now swab!</p>\
-                     <p>Ye be now {user[1]}, ahoy!</p>",
+                     <p>Ye be now {user['name']}, ahoy!</p>",
     }

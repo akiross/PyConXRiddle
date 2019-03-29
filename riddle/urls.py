@@ -27,6 +27,17 @@ def add_encoded_route(route, encoder, **options):
     return _deco
 
 
+def without_answer(entry):
+    """Automatically set answer pass and no score for the entry point."""
+    @functools.wraps(entry)
+    def entry_(*args, **kwargs):
+        r = entry(*args, **kwargs)
+        r['score'] = 0
+        r['answer'] = 'pass'
+        return r
+    return entry_
+
+
 def on_success(redirect=None, score=1):
     """Determine what happens on level passed."""
     def _deco(entry):
