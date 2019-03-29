@@ -1,8 +1,8 @@
-import os
 import sqlite3
 from pathlib import Path
+
 from riddle import database
-from riddle.names import random_animal, generate_random_animal
+from riddle.names import generate_random_animal
 
 
 def create_user():
@@ -62,9 +62,9 @@ def is_dunder(stem):
     return stem[:2] == '__' and stem[-2:] == '__'
 
 
-def get_level_files():
+def get_level_files(game_folder):
     """Return the level file paths and their root, as pathlib.Paths."""
-    root = Path(__file__).parent / 'game'
+    root = game_folder / 'game'
     return root, root.glob('**/*.py')
 
 
