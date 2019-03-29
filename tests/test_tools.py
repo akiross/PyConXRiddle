@@ -1,6 +1,8 @@
 import pytest
 
+from PIL import Image
 from riddle import tools
+from itertools import product
 
 
 @pytest.mark.parametrize('shift,input_string,expected', [
@@ -154,3 +156,56 @@ def test_prime_generator():
 ])
 def test_bits_to_tuple(value, expansion):
     assert tools.bits_to_tuple(*value) == expansion
+
+
+@pytest.mark.parametrize('write_seq, read_seq', [
+    (b'\x00\x00\x00', b'\x00\x00\x00'),
+    (b'\x01\x02\x03', b'\x01\x02\x03'),
+    (b'\x10\x20\x30', b'\x10\x20\x30'),
+])
+def test_seq_steganography(write_seq, read_seq):
+    # Build a matrix as image
+    seq = (0x0, 0x1, 0x2, 0x4, 0x8)
+    image_data = bytes(a * 0x10 + b for a, b in product(seq, repeat=2))
+    img = Image.frombytes('L', (len(seq), len(seq)), image_data)
+    # Write bytes to image (ensure data will fit)
+    assert len(write_seq) * 8 <= len(seq) * len(seq)
+    steg_img = tools.write_to_image_bit(img, write_seq)
+    # Read bytes from image, but crop trailing bytes
+    assert read_seq == tools.read_from_image_bit(steg_img)[:len(read_seq)]
+
+
+@pytest.mark.parametrize('img_bytes,bit,in_data,out_data', [
+    # Plain image, store nothing, read back LSB values
+    ((0b00000000, 0b00000010, 0b00001000,
+      0b00010000, 0b00010010, 0b00011000,
+      0b01000000, 0b01000010, 0b01001000), 0, b'', b'\x00\x00'),
+    # Store 0x5500, check bit matrix and get LSB value
+    ((0b00000000, 0b00000011, 0b00001000,
+      0b00010001, 0b00010010, 0b00011001,
+      0b01000000, 0b01000011, 0b01001000), 0, b'\x55\x00', b'\x55\x00'),
+    # Store 0x5500 in second least significant bit and check
+    ((0b00000000, 0b00000010, 0b00001000,
+      0b00010010, 0b00010000, 0b00011010,
+      0b01000000, 0b01000010, 0b01001000), 1, b'\x55\x00', b'\x55\x00'),
+    # Store 0x5580 in MSB and check
+    ((0b00000000, 0b10000010, 0b00001000,
+      0b10010000, 0b00010010, 0b10011000,
+      0b01000000, 0b11000010, 0b11001000), 7, b'\x55\x80', b'\x55\x80'),
+])
+def test_img_steganography(img_bytes, bit, in_data, out_data):
+    # Build a "template" 3x3 image
+    s1 = (0b0000, 0b0001, 0b0100)
+    s2 = (0b0000, 0b0010, 0b1000)
+    image_data = bytes(a * 0x10 + b for a, b in product(s1, s2))
+    img = Image.frombytes('L', (len(s1), len(s2)), image_data)
+
+    writer = tools.make_ith_bit_writer(bit)
+    reader = tools.make_ith_bit_reader(bit)
+
+    # Write data in image
+    steg_img = tools.write_to_image_bit(img, in_data, writer)
+    # Check that bytes in image are what we expect
+    assert tuple(steg_img.tobytes()) == img_bytes
+    # Read back data and check
+    assert tools.read_from_image_bit(steg_img, reader) == out_data

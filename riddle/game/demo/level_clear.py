@@ -3,7 +3,7 @@
 import random
 
 from jinja2 import Template
-from flask import session, request
+from flask import session
 
 from riddle.utils import create_user, get_user
 from riddle.urls import add_route

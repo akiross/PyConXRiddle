@@ -28,11 +28,11 @@ def level_access_verification():
 
     # Ensure requested URL can be read
     accessed = request.path[1:]
-    levels = utils.get_level_structure()
+    levels = [str(l) for l in utils.get_level_structure()]
     if accessed not in levels:
         return None  # Let this be handled by a 404
     # Query user progress and check permissions
-    progress = utils.query_user_progress(session['user_id'])
+    progress = list(utils.query_user_progress(session['user_id']))
     user_allowed = utils.is_user_allowed(accessed, progress)
     if not user_allowed:
         return user_not_allowed(None)
@@ -73,24 +73,28 @@ def create_app():
 
     app.before_request(level_access_verification)
 
+    level_map = {}
     root, level_files = utils.get_level_files()
     for n in level_files:
         try:
-            name = n.relative_to(root).parent / n.stem
-            app.logger.debug(f"Processing riddle file {name}")
-            mod_name = str('.'.join(name.parts))
+            if utils.is_dunder(n):
+                # Dunder files are special, TODO
+                app.logger.warning(f"Found dunder {n}")
+                continue
+            # Regular files are levels to be registered
+            path, mod_name = utils.get_level_pathname(n, root)
+            app.logger.debug(f"Processing riddle file {path}")
             mod = importlib.import_module('.' + mod_name, 'riddle.game')
+            mod.entry.is_entry_point = True  # Mark this as entry point
             # Each entry point might have multiple associated rules
-            for rule, options in utils.get_level_route(mod_name, mod.entry):
-                app.logger.info(f"Registering module {mod_name} with route {rule}")
-                # Use module name as default endpoint
-                if 'endpoint' not in options:
-                    options['endpoint'] = mod_name
+            for rule, options in utils.get_level_routes(path, mod.entry):
                 options['view_func'] = entry_point(mod.entry)
+                app.logger.info(f"Registering module {mod_name} with route {rule}")
                 app.add_url_rule(rule, **options)
+                level_map.setdefault(str(path), []).append(rule)
         except AttributeError:
             app.logger.warning(f"Riddle {n} is missing entry point.")
         except Exception as e:
             app.logger.exception(f"Unable to load module {n}: {e}")
-
+    app.config['level_map'] = level_map
     return app
