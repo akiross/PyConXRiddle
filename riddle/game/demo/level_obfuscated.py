@@ -18,4 +18,6 @@ entry_text = '''<h1>Obfuscated Level</h1>
 @add_encoded_route('/{name}/<passcode>', lambda x: x[::-1])
 def entry(passcode):
     user = get_user(session['user_id'])
-    return Template(entry_text).render(user=user, passcode=passcode), False
+    return {
+        'content': Template(entry_text).render(user=user, passcode=passcode),
+    }

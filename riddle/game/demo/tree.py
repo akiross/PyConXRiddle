@@ -41,10 +41,6 @@ template = r"""
 
 
 def entry():
-    return user_progress(), False
-
-
-def user_progress():
     """Return a table of levels solved by each user."""
     # Query all progress from all users
     tpl = Template(template)
@@ -52,7 +48,7 @@ def user_progress():
     # Prepare data to be visualized
     levels = dict()  # Dict level -> {user solved}
     users = set()  # Set of users
-    for user_id, solved_level in utils.query_user_progress(None):
+    for user_id, solved_level, _ in utils.query_user_progress(None):
         users.add(user_id)
         levels.setdefault(solved_level, set()).add(user_id)
 
@@ -66,4 +62,6 @@ def user_progress():
     for l in ls:
         solved.append((l, level_map[l], [u in levels.get(l, {}) for u in users]))
 
-    return tpl.render(users=users, levels=solved)
+    return {
+        'content': tpl.render(users=users, levels=solved),
+    }

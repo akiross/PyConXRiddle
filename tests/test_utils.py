@@ -1,9 +1,14 @@
+import pytest
 import sqlite3
+
 from pathlib import Path
 from unittest import mock
 from riddle import database
+from riddle.utils import get_user_flag
+from riddle.utils import set_user_flag
 from riddle.utils import get_level_files
 from riddle.utils import is_user_allowed
+from riddle.utils import unset_user_flag
 from riddle.utils import get_level_routes
 from riddle.utils import get_level_structure
 from riddle.utils import level_prerequisites
@@ -245,15 +250,72 @@ def test_level_routing():
 
 
 def test_user_progress():
-    # # Create sqlite in memory
-    # with mock.patch('riddle.database.get_connection') as mockconn:
-    #     mockconn.return_value = sqlite3.connect(':memory:')
-    #     database.init()  # Richiede una app
-    #     assert list(query_user_progress('test')) == []
-    #     
-    # # Set it as current config
-    assert False
+    # Create sqlite in memory
+    with mock.patch('riddle.database.get_connection') as mockconn:
+        conn = sqlite3.connect(':memory:')
+        conn.executescript(open('riddle/schema.sql', 'rt').read())
+        mockconn.return_value = conn
+
+        users = ['user0', 'user1']
+        levels = [f'/mock/levels/{i}' for i in range(4)]
+        # Initially there is no progress 
+        assert sorted(query_user_progress(users[0])) == []
+
+        # The progress can be added to the database
+        update_user_progress(users[0], levels[0])
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1)]
+         
+        # Duplicated entries should not occurr
+        update_user_progress(users[0], levels[0])
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1)]
+
+        # Multiple entries are ok
+        update_user_progress(users[0], levels[1])
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1),
+                                                         (users[0], levels[1], 1)]
+
+        # Having multiple users should be no problem
+        update_user_progress(users[1], levels[0])
+        update_user_progress(users[1], levels[2], 2)
+        update_user_progress(users[0], levels[3])
+        assert sorted(query_user_progress(users[0])) == [(users[0], levels[0], 1),
+                                                         (users[0], levels[1], 1),
+                                                         (users[0], levels[3], 1)]
+
+        assert sorted(query_user_progress(users[1])) == [(users[1], levels[0], 1),
+                                                         (users[1], levels[2], 2)]
+
+        # We should be able to query all users
+        assert sorted(query_user_progress(None)) == [(users[0], levels[0], 1),
+                                                     (users[0], levels[1], 1),
+                                                     (users[0], levels[3], 1),
+                                                     (users[1], levels[0], 1),
+                                                     (users[1], levels[2], 2)]
 
 
 def test_user_flag():
-    assert False
+    # Create sqlite in memory
+    with mock.patch('riddle.database.get_connection') as mockconn:
+        conn = sqlite3.connect(':memory:')
+        conn.executescript(open('riddle/schema.sql', 'rt').read())
+        mockconn.return_value = conn
+
+        users = ['user0', 'user1']
+        # levels = [f'/mock/levels/{i}' for i in range(4)]
+        flags = [f'flag{i}' for i in range(4)]
+        values = [f'value{i}' for i in range(4)]
+
+        # Values default to None
+        assert get_user_flag(users[0], flags[0]) is None
+
+        # Values can be set
+        set_user_flag(users[0], flags[0], values[0])
+        assert get_user_flag(users[0], flags[0]) == values[0]
+
+        # Values are updated correctly
+        set_user_flag(users[0], flags[0], values[1])
+        assert get_user_flag(users[0], flags[0]) == values[1]
+
+        # Values can be unset
+        unset_user_flag(users[0], flags[0])
+        assert get_user_flag(users[0], flags[0]) is None
