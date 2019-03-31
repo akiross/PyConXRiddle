@@ -1,6 +1,6 @@
 """This module contains (en|de)cryption tools for the game."""
 
-# import numpy as np
+import itertools
 from PIL import Image
 from textwrap import dedent
 
@@ -189,25 +189,60 @@ def dumb_primality_test(n):
 
 
 def sieve_of_eratosthenes(n):
-    """Return the list of primes not greater of n."""
-    primes = [True] * n
-    i, sqrtn = 2, n ** 0.5
+    """Return the list of primes not greater of n.
+    
+    This uses arbitrarily large integers as boolean array and uses a wheel
+    to skip multiples of 2, 3 and 5.
+    """
+    skip, start = [2, 3, 5], 7
+    wheel = itertools.cycle([6, 4, 2, 4, 2, 4, 6, 2])
+
+    table = 0
+    i, sqrtn = start, n ** 0.5
     while i < sqrtn:
-        if primes[i]:
+        if (table >> i) & 1:
             for j in range(i * i, n, i):
-                primes[j] = False
-        i += 1
-    return [i for i, v in enumerate(primes[2:], 2) if v]
+                table |= 1 << j
+        i += next(wheel)  # Skip odd numbers
+    primes = skip
+    for i in range(n):
+        table = table >> 1
+        if table & 1:
+            primes.append(i)
+    return primes
 
 
 def prime_generator():
-    """Generate prime numbers forever and ever until your computer explodes."""
-    p = 2
-    yield p
-    while True:
-        p += 1
-        if dumb_primality_test(p):  # SLOW!
-            yield p
+    """Generate prime numbers forever and ever until your computer explodes.
+    
+    This generator is way slower than the sieve_of_eratosthenes: use that one
+    if you know how many primes to generate or if you have enough memory.
+
+    This is an iterative, non-recursive version of the Melissa E. O'Neill's
+        https://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf
+    but mine is less efficient, so - as she argues - it is not the same algo.
+
+    There are better version on line, if you care
+        https://rosettacode.org/wiki/Sieve_of_Eratosthenes#Python
+    """
+    yield 2
+    # Table of (next) multiples: each entry (key) associates the next multiple
+    # to be tested with its generating prime (value)
+    multiples = dict()
+    # i is the candidate prime number
+    for i in itertools.count(3, 2):  # Start with 3 and skip even numbers
+        if i in multiples:
+            # Get the prime number associated to the composite multiple i
+            p = multiples[i]
+            # Compute multiples of p until there is a free spot in the table
+            # and ensure we don't get a multiple of skipped numbers (2, here)
+            n = i + p
+            while n in multiples or n % 2 == 0:
+                n += p
+            multiples[n] = multiples.pop(i) 
+        else:
+            yield i  # This number is prime, as it is not a multiple
+            multiples[i * i] = i
 
 
 def bits_to_tuple(b, n):
@@ -326,17 +361,38 @@ def read_from_image_bit(img, bit_reader=lsb_reader):
 
 
 if __name__ == '__main__':
-    text = dedent('''\
-        "The quick brown fox jumps over the lazy dog"
-        is a typical sentence used to test fonts as it contains all the 26
-        English letters, but in our case, we need to test "points" as well!
-        What d'ya think?''')
-    draw_subpixel_text(text).save('prova.png')
+    if True:
+        import time
+        from operator import eq
+        count = 1000000
+        print("Generating primes below", count)
 
-    msb_writer = make_ith_bit_writer(5)
-    msb_reader = make_ith_bit_reader(5)
+        start = time.time()
+        table_primes = sieve_of_eratosthenes(count)
+        table_time = time.time() - start
+        print("  Table took", table_time, "[s]")
 
-    img = Image.open("../demo_image.jpg")
-    img2 = write_to_image_bit(img, 'Hello there! ☺'.encode(), msb_writer)
-    img2.show()
-    print(read_from_image_bit(img2, msb_reader).decode())
+        start = time.time()
+        gen_primes = list(p for _, p in zip(range(count), prime_generator()))
+        gen_time = time.time() - start
+        print("  Generator took", gen_time, "[s]")
+
+        print("Same?", all(itertools.starmap(eq,
+                                             zip(table_primes, gen_primes))))
+
+    if False:
+        text = dedent('''\
+            "The quick brown fox jumps over the lazy dog"
+            is a typical sentence used to test fonts as it contains all the 26
+            English letters, but in our case, we need to test "points" as well!
+            What d'ya think?''')
+        draw_subpixel_text(text).save('prova.png')
+
+        msb_writer = make_ith_bit_writer(5)
+        msb_reader = make_ith_bit_reader(5)
+
+        img = Image.open("../demo_image.jpg")
+        img2 = write_to_image_bit(img, 'Hello there! ☺'.encode(), msb_writer)
+        img2.show()
+        print(read_from_image_bit(img2, msb_reader).decode())
+
