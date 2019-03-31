@@ -88,6 +88,7 @@ def create_app():
         sys.path.append(game_path)
     else:
         game_path = pathlib.Path(__file__).parent
+        app.config['GAME_PATH'] = __file__
     root, level_files = utils.get_level_files(game_path)
 
     for n in level_files:
