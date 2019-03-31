@@ -1,6 +1,9 @@
 import logging
 import functools
 import importlib
+import pathlib
+import sys
+
 
 from flask import Flask, session, request, redirect
 
@@ -100,8 +103,14 @@ def entry_point(func):
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)
     app.config.from_envvar('RIDDLE_CONFIG')
+
+    app.static_url_path = app.config.get('STATIC_PATH', 'static')
+    app.add_url_rule(
+        f'/{app.static_url_path}/<path:filename>',
+        endpoint='static',
+        view_func=app.send_static_file)
 
     # Register default error handlers
     # TODO custom error handlers shall be in riddle.game.__init__
@@ -113,7 +122,14 @@ def create_app():
     app.before_request(level_access_verification)
 
     level_map = {}
-    root, level_files = utils.get_level_files()
+    game_path = app.config.get('GAME_PATH')
+    if game_path is not None:
+        sys.path.append(game_path)
+    else:
+        game_path = pathlib.Path(__file__).parent
+        app.config['GAME_PATH'] = __file__
+    root, level_files = utils.get_level_files(game_path)
+
     for n in level_files:
         try:
             if utils.is_dunder(n):

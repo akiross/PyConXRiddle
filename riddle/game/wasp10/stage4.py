@@ -83,7 +83,7 @@ you find!'''.strip())
 
 
 @add_route(None, methods=['GET', 'POST'])
-@on_success(score=10) # redirect='/wasp10/stage0', score=10)
+@on_success(score=10)  # redirect='/wasp10/stage0', score=10)
 def entry():
     # Page information to display
     page = {
@@ -103,7 +103,7 @@ def entry():
         # Normally, we would show his answer for confirmation
         page['answer'] = answer
         page['true_answer'] = answer  # When confirming use the real answer
-        if progress_status is None: # or True:  # FIXME this is for debugging
+        if progress_status is None:  # or True:  # FIXME this is for debugging
             # The first time user sends the data, we show the help message
             set_user_flag(user_id, status_key, 'tainted')
             page['answer'] = 'help!'
@@ -136,5 +136,5 @@ def entry():
 def verify(answer):
     try:
         return int(answer.strip()) == 500 * 500
-    except:
+    except Exception:
         return False  # Any invalid input is no good

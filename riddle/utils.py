@@ -1,8 +1,10 @@
-import os
 import sqlite3
 from pathlib import Path
+
+from flask import current_app
+
 from riddle import database
-from riddle.names import random_animal, generate_random_animal
+from riddle.names import generate_random_animal
 
 
 def create_user():
@@ -92,16 +94,16 @@ def is_dunder(stem):
     return stem[:2] == '__' and stem[-2:] == '__'
 
 
-def get_level_files():
+def get_level_files(game_folder):
     """Return the level file paths and their root, as pathlib.Paths."""
-    root = Path(__file__).parent / 'game'
+    root = Path(game_folder) / 'game'
     return root, root.glob('**/*.py')
 
 
 def get_level_pathname(fpath, root=None):
     """Given a game file, return its url-path and name in the game."""
     if root is None:
-        root, _ = get_level_files()
+        root, _ = get_level_files(current_app.config['GAME_PATH'])
     else:
         root = Path(root)  # Ensure it's a Path
     fpath = Path(fpath)
@@ -112,7 +114,7 @@ def get_level_pathname(fpath, root=None):
 
 def get_level_structure():
     """Return the url-paths for the levels in the game hierarchy."""
-    root, files = get_level_files()
+    root, files = get_level_files(current_app.config['GAME_PATH'])
     return [get_level_pathname(fp)[0] for fp in files if not is_dunder(fp)]
 
 

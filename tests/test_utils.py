@@ -48,25 +48,27 @@ def test_level_files():
 
     with mock.patch('pathlib.Path.glob') as mockglob:
         mockglob.return_value = file_list
-        root, ls = get_level_files()
+        root, ls = get_level_files('riddle/game')
         assert ls == file_list
 
 
-def test_level_structure():
+def test_level_structure(test_app):
     file_list = [Path('riddle/game') / f'{l}.py' for l in example_levels]
 
     with mock.patch('riddle.utils.get_level_files') as mockglob:
         mockglob.return_value = Path('riddle/game/'), file_list
-        ls = get_level_structure()
+        with test_app.app_context():
+            ls = get_level_structure()
         assert [str(l) for l in ls] == example_levels
 
 
-def test_level_structure_dict():
+def test_level_structure_dict(test_app):
     file_list = [Path('riddle/game') / f'{l}.py' for l in example_levels]
 
     with mock.patch('riddle.utils.get_level_files') as mockglob:
         mockglob.return_value = Path('riddle/game/'), file_list
-        ls = level_structure_dict()
+        with test_app.app_context():
+            ls = level_structure_dict()
         assert ls == {
             'riddle_1_a': None,
             'riddle_1_b': None,
@@ -128,80 +130,81 @@ def test_level_prerequisites():
             assert set(level_prerequisites(level)) == set(prereq)
 
 
-def test_user_access():
-    with mock.patch('riddle.utils.get_level_structure') as mockls:
-        mockls.return_value = [
-            'riddle',
-            'level/riddle',
-        ]
+def test_user_access(test_app):
+    with test_app.app_context():
+        with mock.patch('riddle.utils.get_level_structure') as mockls:
+            mockls.return_value = [
+                'riddle',
+                'level/riddle',
+            ]
 
-        cases = [
-            ['riddle', [], True],
-            ['riddle', ['riddle'], True],
-            ['riddle', ['riddle', 'level/riddle'], True],
-            ['level/riddle', [], False],
-            ['level/riddle', ['riddle'], True],
-            ['level/riddle', ['riddle', 'level/riddle'], True],
-        ]
-        for level, solved, expected in cases:
-            assert is_user_allowed(level, solved) == expected
+            cases = [
+                ['riddle', [], True],
+                ['riddle', ['riddle'], True],
+                ['riddle', ['riddle', 'level/riddle'], True],
+                ['level/riddle', [], False],
+                ['level/riddle', ['riddle'], True],
+                ['level/riddle', ['riddle', 'level/riddle'], True],
+            ]
+            for level, solved, expected in cases:
+                assert is_user_allowed(level, solved) == expected
 
-    with mock.patch('riddle.utils.get_level_structure') as mockls:
-        mockls.return_value = example_levels_2
+        with mock.patch('riddle.utils.get_level_structure') as mockls:
+            mockls.return_value = example_levels_2
 
-        cases = [
-            ['riddle_1', [], True],
-            ['riddle_2', [], True],
-            ['riddle_1', ['riddle_1'], True],
-            ['riddle_2', ['riddle_1'], True],
-            ['riddle_2', [
-                'riddle_1',
-                'level_1/riddle',
-                'level_2/riddle_2',
-            ], True],
-            ['riddle_2', [
-                'riddle_1',
-                'level_1/riddle',
-                'level_2/riddle_2',
-                'level_2/level_3/riddle_1',
-            ], True],
-            ['level_1/riddle', [], False],
-            ['level_1/riddle', ['riddle_1'], False],
-            ['level_1/riddle', ['riddle_2'], False],
-            ['level_1/riddle', ['level_1/riddle'], False],
-            ['level_1/riddle', ['riddle_1', 'riddle_2'], True],
-            ['level_2/riddle_1', ['riddle_1', 'riddle_2'], True],
-            ['level_2/riddle_2', ['riddle_1', 'riddle_2'], True],
-            ['level_2/riddle_3', ['riddle_1', 'riddle_2'], True],
-            ['level_2/level_3/riddle_1', ['riddle_1', 'riddle_2'], False],
-            ['level_2/level_3/riddle_2', [
-                'riddle_1',
-                'riddle_2',
-                'level_1/riddle',
-                'level_2/riddle_1',
-                'level_2/riddle_2',
-                ], False],
-        ]
+            cases = [
+                ['riddle_1', [], True],
+                ['riddle_2', [], True],
+                ['riddle_1', ['riddle_1'], True],
+                ['riddle_2', ['riddle_1'], True],
+                ['riddle_2', [
+                    'riddle_1',
+                    'level_1/riddle',
+                    'level_2/riddle_2',
+                ], True],
+                ['riddle_2', [
+                    'riddle_1',
+                    'level_1/riddle',
+                    'level_2/riddle_2',
+                    'level_2/level_3/riddle_1',
+                ], True],
+                ['level_1/riddle', [], False],
+                ['level_1/riddle', ['riddle_1'], False],
+                ['level_1/riddle', ['riddle_2'], False],
+                ['level_1/riddle', ['level_1/riddle'], False],
+                ['level_1/riddle', ['riddle_1', 'riddle_2'], True],
+                ['level_2/riddle_1', ['riddle_1', 'riddle_2'], True],
+                ['level_2/riddle_2', ['riddle_1', 'riddle_2'], True],
+                ['level_2/riddle_3', ['riddle_1', 'riddle_2'], True],
+                ['level_2/level_3/riddle_1', ['riddle_1', 'riddle_2'], False],
+                ['level_2/level_3/riddle_2', [
+                    'riddle_1',
+                    'riddle_2',
+                    'level_1/riddle',
+                    'level_2/riddle_1',
+                    'level_2/riddle_2',
+                    ], False],
+            ]
 
-        for level, solved, expected in cases:
-            assert is_user_allowed(level, solved) == expected
+            for level, solved, expected in cases:
+                assert is_user_allowed(level, solved) == expected
 
-    # Ensure dunder files are ignored in the level structure
-    with mock.patch('riddle.utils.get_level_files') as mockfp:
-        mockfp.return_value = Path('/riddle/game'), [
-            Path('/riddle/game/__foo__.py'),
-            Path('/riddle/game/foo/foo.py'),
-            Path('/riddle/game/bar/bar.py'),
-        ]
+        # Ensure dunder files are ignored in the level structure
+        with mock.patch('riddle.utils.get_level_files') as mockfp:
+            mockfp.return_value = Path('/riddle/game'), [
+                Path('/riddle/game/__foo__.py'),
+                Path('/riddle/game/foo/foo.py'),
+                Path('/riddle/game/bar/bar.py'),
+            ]
 
-        cases = [
-            ['foo/foo', [], True],
-            ['bar/bar', [], True],
-            ['foo/foo', ['bar/bar'], True],
-            ['bar/bar', ['foo/foo'], True],
-        ]
-        for level, solved, expected in cases:
-            assert is_user_allowed(level, solved) == expected
+            cases = [
+                ['foo/foo', [], True],
+                ['bar/bar', [], True],
+                ['foo/foo', ['bar/bar'], True],
+                ['bar/bar', ['foo/foo'], True],
+            ]
+            for level, solved, expected in cases:
+                assert is_user_allowed(level, solved) == expected
 
 
 def test_level_routing():
