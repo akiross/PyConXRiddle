@@ -212,6 +212,16 @@ def sieve_of_eratosthenes(n):
     return primes
 
 
+def _dumb_prime_generator():
+    """Generate prime numbers in a very silly way."""
+    p = 2
+    yield p
+    while True:
+        p += 1
+        if dumb_primality_test(p):  # SLOW!
+            yield p
+
+
 def prime_generator():
     """Generate prime numbers forever and ever until your computer explodes.
     
@@ -379,6 +389,17 @@ if __name__ == '__main__':
 
         print("Same?", all(itertools.starmap(eq,
                                              zip(table_primes, gen_primes))))
+
+        # This is slow, don't try it for large numbers
+        if count < 10000:
+            start = time.time()
+            dumb_primes = list(p for _, p in zip(range(count),
+                                                 _dumb_prime_generator()))
+            dumb_time = time.time() - start
+            print("  Dumb generator took", dumb_time, "[s]")
+
+            print("Same?", all(itertools.starmap(eq,
+                                                 zip(table_primes, dumb_primes))))
 
     if False:
         text = dedent('''\
