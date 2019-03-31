@@ -17,4 +17,6 @@ entry_text = '''<h1>Cleartext Level</h1>
 @add_route('/cleartext/<passcode>', endpoint='cleartext')
 def entry(passcode):
     user = get_user(session['user_id'])
-    return Template(entry_text).render(user=user, passcode=passcode), False
+    return {
+        'content': Template(entry_text).render(user=user, passcode=passcode),
+    }

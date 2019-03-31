@@ -24,15 +24,21 @@ def get_user(user_id):
     cur = db.execute('SELECT * FROM user WHERE id = ?',
                      [user_id])
     db.commit()
-    return cur.fetchone()  # Returns user or None
+    user = cur.fetchone()  # Returns user or None
+    if user is not None:
+        return dict(user)
+    return None
 
 
-def update_user_progress(user_id, level):
+def update_user_progress(user_id, level, score=1):
     db = database.get_connection()
     try:
         db.execute(
-            'INSERT INTO progress (user_id, level) values(?,?)',
-            [user_id, level])
+            'INSERT INTO progress (user_id, level, score) VALUES (?,?,?)',
+            [user_id, level, score])
+        db.execute(
+            'UPDATE user SET score = score + ? WHERE id = ?',
+            [score, user_id])
         db.commit()
     except sqlite3.IntegrityError:
         pass  # Progress was already stored
@@ -41,19 +47,43 @@ def update_user_progress(user_id, level):
 def query_user_progress(user_id):
     db = database.get_connection()
     if user_id is None:
-        res = db.execute('SELECT user_id, level FROM progress')
+        res = db.execute('SELECT user_id, level, score FROM progress')
     else:
-        res = db.execute('SELECT user_id, level FROM progress WHERE user_id=?',
+        res = db.execute('SELECT user_id, level, score FROM progress WHERE user_id=?',
                          [user_id])
-    yield from ((r['user_id'], r['level']) for r in res)
+    yield from ((r[0], r[1], r[2]) for r in res)
 
 
-def set_user_flag(user_id, level, flag, value):
-    pass
+def set_user_flag(user_id, flag, value):
+    db = database.get_connection()
+    try:
+        res = db.execute('''INSERT OR REPLACE
+                            INTO user_flag (user_id, flag, value)
+                            VALUES (?,?,?)''', [user_id, flag, value])
+        db.commit()
+    except sqlite3.IntegrityError:
+        pass
 
 
-def get_user_flag(user_id, level, flag, value):
-    pass
+def unset_user_flag(user_id, flag):
+    db = database.get_connection()
+    try:
+        res = db.execute('''DELETE FROM user_flag
+                            WHERE user_id=? AND flag=?''',
+                            [user_id, flag])
+        db.commit()
+    except sqlite3.IntegrityError:
+        pass
+
+
+def get_user_flag(user_id, flag):
+    db = database.get_connection()
+    res = db.execute('''SELECT user_id, flag, value FROM user_flag
+                        WHERE user_id=? AND flag=?''', [user_id, flag])
+    res = res.fetchone()
+    if res is not None:
+        return res[2]
+    return None
 
 
 def is_dunder(stem):
@@ -88,12 +118,18 @@ def get_level_structure():
 
 def get_level_routes(upath, entry_point):
     """Given the url-path of the level and the entry_point, return its route."""
+    def _make_route(r):
+        if callable(r):
+            return r(upath)
+        elif r is None:
+            return f'/{upath}'
+        return r
+
     if hasattr(entry_point, 'route'):
         # Call routes that are callable
-        routes = [(r(upath) if callable(r) else r, d)
-                  for r, d in entry_point.route]
+        routes = [(_make_route(r), d) for r, d in entry_point.route]
     else:
-        routes = [(f'/{upath}', {})]  # Default route for undecorated EP
+        routes = [(_make_route(None), {})]  # Default route for undecorated EP
 
     # Fix endpoints
     for rule, options in routes:
