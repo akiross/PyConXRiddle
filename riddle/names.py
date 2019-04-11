@@ -2,8 +2,8 @@ import random
 import itertools
 
 
-# Using list(set()) to avoid duplicates and allow indexing
-_adjectives = list(set('''
+# Using sorted(set()) to avoid duplicates, allow indexing and reproduciblity
+_adjectives = sorted(set('''
 admiring adoring affectionate agitated amazing angry awesome blissful boring
 brave clever cocky compassionate competent condescending confident cranky
 dazzling determined distracted dreamy eager ecstatic elastic elated elegant
@@ -18,7 +18,7 @@ zealous zen
 '''.split()))
 
 
-_names = list(set('''
+_names = sorted(set('''
 albattani allen almeida agnesi archimedes ardinghelli aryabhata austin babbage
 banach bardeen bartik bassi beaver bell benz bhabha bhaskara blackwell bohr
 booth borg bose boyd brahmagupta brattain brown carson chandrasekhar shannon
@@ -39,7 +39,7 @@ wright yalow yonath pythagoras weierstrass alexander
 '''.split()))
 
 
-_animals = list(set('''
+_animals = sorted(set('''
 aardvark albatross alligator alpaca ant anteater antelope ape armadillo baboon
 badger barracuda bat bear beaver bee bird bison boar buffalo butterfly camel
 caribou cassowary cat caterpillar chameleon chamois cheetah chicken chimpanzee
@@ -62,37 +62,45 @@ turtle wallaby walrus wasp weasel whale wolf wolverine wombat wren yak zebra
 '''.split()))
 
 
-def random_name(sep='_'):
-    first = random.choice(_names)
-    second = random.choice(_adjectives)
+def random_name(sep='_', rng=None):
+    if rng is None:
+        rng = random
+    first = rng.choice(_adjectives)
+    second = rng.choice(_names)
     return f"{first}{sep}{second}"
 
 
-def random_animal(sep='_'):
-    first = random.choice(_names)
-    second = random.choice(_adjectives)
-    third = random.choice(_animals)
+def random_animal(sep='_', rng=None):
+    if rng is None:
+        rng = random
+    first = rng.choice(_names)
+    second = rng.choice(_adjectives)
+    third = rng.choice(_animals)
     return f"{first}{sep}the{sep}{second}{sep}{third}"
 
 
-def generate_random_seq(n, chunk=1000):
+def generate_random_seq(n, chunk=1000, rng=None):
     """Generate all the numbers in [0,n)"""
+    if rng is None:
+        rng = random
     # Generate chunks of numbers
     nums = []
     for i in range(n):
         if len(nums) < chunk:
             nums.append(i)
         else:
-            random.shuffle(nums)
+            rng.shuffle(nums)
             yield from (i for i in nums)
             nums = []
-    random.shuffle(nums)
+    rng.shuffle(nums)
     yield from (i for i in nums)
 
 
-def generate_random_animal(sep='_'):
+def generate_random_animal(sep='_', rng=None):
+    if rng is None:
+        rng = random
     while True:
-        first = random.sample(_names, 1)[0]
-        second = random.sample(_adjectives, 1)[0]
-        third = random.sample(_animals, 1)[0]
+        first = rng.sample(_names, 1)[0]
+        second = rng.sample(_adjectives, 1)[0]
+        third = rng.sample(_animals, 1)[0]
         yield f"{first}{sep}the{sep}{second}{sep}{third}"

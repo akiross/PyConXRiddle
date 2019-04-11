@@ -111,38 +111,76 @@ team. When enough bits have been sent, the user can proceed to the next level.
  6. Find the agent: some undercover agents were infiltrated in pyconx, they are
     unaware of being manipolated by the AI (they are wearing QR-codes, each
 	code is giving some points).
+	When you convinced them that you met monty python, they will tell you that
+	they received instructions via a message, the message is an e-mail with
+	some text. The object of the message is a number, say NNN-NNN-NNN.
 
  7. To actually pass this level, the user must access a physical terminal that
-    is available at the conference and log in. From there, it must get the
-	private ssh key and upload it to the riddle game level.
+    is available at the conference and log in.
+	REM 
+	REM From there, it must get the
+	REM private ssh key and upload it to the riddle game level.
+	REM
 
 ## Apparently the AI is using you to destroy the world
 
-After some digging, you find out that the messages you are getting are from the
-AI itself: it is manipulating the WASP10 contestants to break some codes and
-accessing some systems. Now that it has the public ssh key, the AI can break in
-and subvert the system. The player finds out that the AI was playing a game.
+The physical terminal contains an image which helds some secret information
+(steganography): a public RSA key, just a few bits large.
+The image is appropriately displaying the text "AI WILL RULE THE WORLD", which
+was humorously set by the owner of the computer, which is an AI fanboy. On the
+computer, there are some notes written by the owner that show how he thought
+that the only hope for humanity to avoid self-destruction is to build an AI
+that helps the humans to gain freedom from the fear of death.
+This individual, who was a contributor to the PyCon conference, has disappear
+in a tragic accident few months back, so that computer is left there in his
+memory.
 
-When the user accessed the system and gets the private key, he will find a
-background picture with the text "AI WILL RULE THE WORLD".
-In that picture, the first/ast bytes are another (encrypted) URL that shows the
-progress of each user in an hypothetical plan. The user will see the progress
-of all the users in a table like:
+Just to make sure the user can solve the level, in the Document directory of
+the terminal there is a "Brief guide on RSA encryption", which explains how
+public/private keys can be used to encrypt a message.
+The user must decipher the image and get the public key. The key must also be
+uploaded somewhere. This is where the AI gets the aid it was seeking from
+the user.
 
-	user Foo
-	 - mock challenge [done]
-	 - found mock stats page [done]
-	 - retrieve secret key via physical action [done]
-	user Bar
-	 - mock challenge [done]
-	 - found mock stats page [done]
-	 - retrieve secret key via physical action [waiting]
+Then, the user must go back to the info obtained in the host table:
+the telnet/ssh connection will yield an encrypted message, encrypted with the
+associated private key.
 
-This table was set-up by a little group of Pythonistas who found out the truth
-and are trying to break down the AI. On the computer, in some remote location,
-the user can find the profiles of the people involved (Benci, Miron, etc...).
-By contacting them in real life, they give you a URL with the details to
-help the resistance.
+Decoding the message will yield a path on the system: a folder full of files.
+Those are the plans of the AI. Since an AI is obviously thinking using a
+non-English language, those files are definitely not in English. Yet, since the
+AI manipulated the agents to make them do what it wants, the AI is using some
+sort of translation table to translate its language to English.
+User has to locate the file NNN-NNN-NNN, which is a numpy array with the same
+length of the message sent to the agents. That file will provide a dictionary
+to decode the AI plans.
+
+User must then read the files and discover the true story: the messages player
+has been getting are from the AI itself: it is manipulating the WASP10
+contestants to break some codes and accessing some systems. Now that it has the
+public ssh key, the AI can break in and subvert the system. The player finds
+out that the AI was playing a game.
+
+REM When the user accessed the system and gets the private key, he will find a
+REM background picture with the text "AI WILL RULE THE WORLD".
+REM In that picture, the first/ast bytes are another (encrypted) URL that shows the
+REM progress of each user in an hypothetical plan. The user will see the progress
+REM of all the users in a table like:
+REM 
+REM 	user Foo
+REM 	 - mock challenge [done]
+REM 	 - found mock stats page [done]
+REM 	 - retrieve secret key via physical action [done]
+REM 	user Bar
+REM 	 - mock challenge [done]
+REM 	 - found mock stats page [done]
+REM 	 - retrieve secret key via physical action [waiting]
+REM 
+REM This table was set-up by a little group of Pythonistas who found out the truth
+REM and are trying to break down the AI. On the computer, in some remote location,
+REM the user can find the profiles of the people involved (Benci, Miron, etc...).
+REM By contacting them in real life, they give you a URL with the details to
+REM help the resistance.
 
 ## You must hack into the system to destroy the AI
 
@@ -228,3 +266,8 @@ still be secured! (read on google: secure you kvm machine)
    It would be also nice to let users break in and get back their progress,
    for example by retrieving the cookie key in the user database, but then
    we should let users query the DB (read only!).
+ - To create a process that cannot be stopped, it must run with PID 1 (init).
+   Init handles signals in a different way and it can ignore signal 9 and 19.
+   Some info:
+   https://hackernoon.com/my-process-became-pid-1-and-now-signals-behave-strangely-b05c52cc551c
+   https://www.quora.com/Is-it-possible-to-kill-the-init-process-in-Linux-by-the-kill-9-command

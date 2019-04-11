@@ -332,6 +332,13 @@ if __name__ == '__main__':
         English letters, but in our case, we need to test "points" as well!
         What d'ya think?''')
     draw_subpixel_text(text).save('prova.png')
+    # Create a large with the slogan
+    slogan = 'AI WILL RULE THE WORLD'
+    slen = len(slogan)
+    slogan = ' '.join([slogan] * (960 // slen))
+    slogan = '\n'.join([slogan] * (1080 // 6))
+    # N = R * slen = (1980 / 2) / slen
+    draw_subpixel_text(slogan).save("slogan.png") # ' '.join(slogan for _ in range(1980 // 2 // len(slogan)))).save("slogan.png")
 
     msb_writer = make_ith_bit_writer(5)
     msb_reader = make_ith_bit_reader(5)
