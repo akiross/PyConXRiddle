@@ -92,37 +92,40 @@ The user must use the form of the previous level to communicate with the WASP
 team. When enough bits have been sent, the user can proceed to the next level.
 
  1. User searches for old pages with various entry points, the correct one is
-    like /old/stats.php
+    like /wasp9/stats.php
  2. In that page there are statistics which are computer by querying the server
     for instance `<img src="stats.php?command=average&table=something" />`
  3. The user must try to query the page passing SQL commands and break in,
     getting any info he wants.
- 4. In the DB there is a table "hosts" with a couple of SSH addresses:
-    one address shall not be reachable, while the other is the server address.
-	The user shall be able to connect and enstablish a connection which will
-	yield a fixed answer (e.g. via nologin), this shall be sent in some way
-	to the WASP guy that send you the message and you get a confirmation via
-	comment in the source code. The answer should be like "unable to connect to
-	http://(host that did not work):someport/ with user and password".
-	This exact string must be sent to WASP team.
- 5. User must find a way to modify the table so that the server will connect to
-    his host inside the network at a specified port. Doing so, user gets
-	instructions on some code to break.
- 6. Find the agent: some undercover agents were infiltrated in pyconx, they are
+	- Select and Update queries are exposed via SQL injection, so user can
+	  query all the tables and update values. sqlite_sequence is exposed so one
+	  can get all the tables querying that table.
+ 4. In the DB there is a table "hosts" with some addresses:
+    some addresses are bogus, while others will have an effect. A protocol is
+	associated to every IP, so user can take action. One protocol is http, but
+	the user has no clue he has to hijack that. In the table list, the counter
+	table exposes a reset button which shows how to update the table via a
+	reset button.
+ 5. After resetting, user can access the retrieve page to call the http host.
+ 6. The user must update the table so that retrieve page will
+	connect to his host (must be the same subnet!) and post some data.
+	The data is a message from a WASP10 member that gives further instructions.
+ 7. Find the agent: some undercover agents were infiltrated in pyconx, they are
     unaware of being manipolated by the AI (they are wearing QR-codes, each
 	code is giving some points).
-	When you convinced them that you met monty python, they will tell you that
-	they received instructions via a message, the message is an e-mail with
-	some text. The object of the message is a number, say NNN-NNN-NNN.
-
- 7. To actually pass this level, the user must access a physical terminal that
-    is available at the conference and log in.
-	REM 
-	REM From there, it must get the
-	REM private ssh key and upload it to the riddle game level.
-	REM
+ 8. Player must convince the unaware agent that there is an AI and that they
+    got a message from monty python. They will show you their orders, received
+	as an e-mail with a given number NNN-NNN-NNN. Then give you access to a
+	terminal. Player shall go there to retrieve its IP, than he can connect to
+	it and explore the contents via ssh.
+ 9. To make things harder, the server might disallow ssh password login :)
+	So player must install his ssh public key. Root access is not granted.
 
 ## Apparently the AI is using you to destroy the world
+
+FIXME player shall stay on the physical terminal the least time possible.
+      that terminal must contain messages and notes, nothing else.
+	  The AI "mind files" must be on another computer, the one with the boss.
 
 The physical terminal contains an image which helds some secret information
 (steganography): a public RSA key, just a few bits large.
@@ -160,6 +163,14 @@ has been getting are from the AI itself: it is manipulating the WASP10
 contestants to break some codes and accessing some systems. Now that it has the
 public ssh key, the AI can break in and subvert the system. The player finds
 out that the AI was playing a game.
+
+--
+What do agents know? They are unaware of the fact that AI has cut off WASP10
+organization. They received an email asking to search for talents.
+Talents are redirected to WASP10 challenge and with it they will try to break
+the code.
+The code must be easily accessible, so that the AI can harness computing power
+to break it, but user should not be able to break that code.
 
 REM When the user accessed the system and gets the private key, he will find a
 REM background picture with the text "AI WILL RULE THE WORLD".
@@ -271,3 +282,4 @@ still be secured! (read on google: secure you kvm machine)
    Some info:
    https://hackernoon.com/my-process-became-pid-1-and-now-signals-behave-strangely-b05c52cc551c
    https://www.quora.com/Is-it-possible-to-kill-the-init-process-in-Linux-by-the-kill-9-command
+

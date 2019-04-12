@@ -23,6 +23,9 @@ entry_text = '''{% extends "base" %}
 {% if message is defined %}
 <div>{{ message }}</div>
 {% endif %}
+{% if fetch_counters is defined %}
+<div><a href="{{ url_for("wasp9_fetch") }}">Fetch data</a></div>
+{% endif %}
 {% for table in query %}
 <h1>{{ table.name }} </h1>
 <table>
@@ -55,8 +58,8 @@ entry_text = '''{% extends "base" %}
         <input type="hidden" name="count" value="0" />
         <button type="submit">Reset counters</button>
     </form>
-    <!-- via retrieve.php -->
-    <div>Remember to <i>retrieve</i> new data after reset.</div>
+    <!-- via fetch.php -->
+    <div>Remember to <i>fetch</i> new data after reset.</div>
 </div>
 {% endif %}
 {% endblock %}
@@ -162,10 +165,12 @@ def entry():
             with db:
                 db.execute(query)
                 args = dict(user=user, message="Updated successfully.")
+                if update == 'counter':
+                    args['fetch_counters'] = True
                 return {
                     'content': env.from_string(entry_text).render(args),
                 }
-    except (sqlite3.OperationalError, sqlite3.Warning) as exc:
+    except (sqlite3.OperationalError, sqlite3.IntegrityError, sqlite3.Warning) as exc:
         # Hinting that SQLite is being used
         return {
             'content': env.from_string(error_text).render(

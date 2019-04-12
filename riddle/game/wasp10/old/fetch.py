@@ -2,6 +2,7 @@
 
 import re
 
+from http import client
 from pathlib import Path
 from jinja2 import Template
 from base64 import b64encode
@@ -75,7 +76,7 @@ error_text = '''{% extends "base" %}
 '''
 
 
-@add_route("/wasp9/retrieve.php", endpoint="wasp9_retrieve")
+@add_route("/wasp9/fetch.php", endpoint="wasp9_fetch")
 def entry():
     user = get_user(session['user_id'])
     print("GOT USER DATA", user)
@@ -91,14 +92,20 @@ def entry():
     if matches_re and all(int(x) in range(256) for x in target.split('.')):
         try:
             target = '127.0.0.1:8080'
-            req = urlopen(f'http://{target}', b64encode(success_message))
+            req = urlopen(f'http://{target}',
+                          b64encode(success_message.encode()))
             return {
-                'content': f'foo bar baz :) {target} -> req',
+                'content': f'Content was retrieved successfully.',
                 'success': True,
             }
         except URLError:
             return {
                 'content': f'Unable to connect to {target}',
+            }
+        except (client.RemoteDisconnected, client.BadStatusLine):
+            return {
+                'content': f'Server closed connection unpexpectedly.',
+                'success': True,
             }
     else:
         return {

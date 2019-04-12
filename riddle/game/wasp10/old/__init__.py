@@ -125,12 +125,12 @@ def get_database(user):
 
             CREATE TABLE hosts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                host TEXT NOT NULL UNIQUE,
+                host TEXT NOT NULL,
                 protocol TEXT NOT NULL
             );
 
             CREATE TABLE actl (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user TEXT NOT NULL UNIQUE,
                 crc TEXT NOT NULL
             );
@@ -154,7 +154,8 @@ def get_database(user):
             db.execute('''INSERT INTO hosts (id, host, protocol)
                           VALUES (?,?,?)''', h)
 
-        for u in users:
-            db.execute('''INSERT INTO actl (user, crc) VALUES (?,?)''', u)
+        for user, pwd in users:
+            db.execute('''INSERT INTO actl (user, crc) VALUES (?,?)''', 
+                       [user, zlib.crc32(pwd.encode())])
 
     return db

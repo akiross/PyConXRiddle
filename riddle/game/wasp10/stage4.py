@@ -91,12 +91,12 @@ def entry():
     }
     # Retrieve user id
     user = get_user(session['user_id'])
-    user_id, user_name, *_ = user
-    print("Retrieving user ID", user_id, user_name)
+    print("Retrieving user ID", user)
 
     # Retrieve user status
     status_key = f"{__name__}/status"
-    progress_status = get_user_flag(user_id, status_key)
+    progress_status = get_user_flag(user['id'], status_key)
+    print("User flag", progress_status)
 
     # Get answer from form
     for answer in request_value('q_final_1'):
@@ -105,12 +105,12 @@ def entry():
         page['true_answer'] = answer  # When confirming use the real answer
         if progress_status is None:  # or True:  # FIXME this is for debugging
             # The first time user sends the data, we show the help message
-            set_user_flag(user_id, status_key, 'tainted')
+            set_user_flag(user['id'], status_key, 'tainted')
             page['answer'] = 'help!'
             page['hidden'] = f'<!--\n{help_message}\n-->'
         elif progress_status == 'tainted':
             # The second time, user will not see help message anymore
-            set_user_flag(user_id, status_key, 'cleared')
+            set_user_flag(user['id'], status_key, 'cleared')
         return {
             'content': env.from_string(confirm_text).render(page=page,
                                                             user=user,
