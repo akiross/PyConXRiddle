@@ -5,7 +5,7 @@ import pathlib
 import sys
 
 
-from flask import Flask, session, request, redirect
+from flask import Flask, session, request, redirect, current_app
 
 from riddle import database
 from riddle import cli
@@ -15,29 +15,43 @@ __version__ = '0.2.0-dev'
 
 
 def page_not_found(err):
-    return "Apparently, someone did a mistake.", 404
+    return "Apparently, someone did a mistake (404).", 404
 
 
 def user_not_allowed(err):
-    return "You can't touch this.", 403
+    return "You can't touch this (403).", 403
 
 
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
+    current_app.logger.debug("Checking user accessing")
     # If user does not exist, create a new one
     user = session.get('user_id')
     if user is None:
+        current_app.logger.info("No user in session, creating a new user")
         session['user_id'] = utils.create_user()
+
+    # for foo in foo:
+    #     print(foo)
 
     # Ensure requested URL can be read
     accessed = request.path[1:]
+    current_app.logger.debug(f"Requested path: {accessed}")
     levels = [str(l) for l in utils.get_level_structure()]
-    if accessed not in levels:
+    # We might get a request for a mapped entry point
+    level_map = current_app.config['level_map']
+    # Create a map from routes to level files
+    routes = {r: l for l in level_map for r in level_map[l]}
+    
+    if '/'+accessed not in routes:
+        current_app.logger.info("Cannot find level, should be 404")
         return None  # Let this be handled by a 404
     # Query user progress and check permissions
     progress = list(p[:2] for p in utils.query_user_progress(session['user_id']))
-    user_allowed = utils.is_user_allowed(accessed, progress)
+    current_app.logger.debug(f"Player progress {progress}")
+    user_allowed = utils.is_user_allowed(routes['/'+accessed], progress)
     if not user_allowed:
+        current_app.logger.info("User is not allowed")
         return user_not_allowed(None)
     return None  # Proceed as usual
 
@@ -127,7 +141,7 @@ def create_app():
         sys.path.append(game_path)
     else:
         game_path = pathlib.Path(__file__).parent
-        app.config['GAME_PATH'] = __file__
+        app.config['GAME_PATH'] = game_path
     root, level_files = utils.get_level_files(game_path)
 
     for n in level_files:

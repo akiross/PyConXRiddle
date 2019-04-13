@@ -114,6 +114,7 @@ def get_level_pathname(fpath, root=None):
 
 def get_level_structure():
     """Return the url-paths for the levels in the game hierarchy."""
+    current_app.logger.debug(f"Getting files in game folder {current_app.config['GAME_PATH']}")
     root, files = get_level_files(current_app.config['GAME_PATH'])
     return [get_level_pathname(fp)[0] for fp in files if not is_dunder(fp)]
 
@@ -211,14 +212,16 @@ def level_prerequisites(level):
 
 def is_user_allowed(level, solved):
     """Given a list of solved riddles, return True if user can access level."""
+    current_app.logger.debug(f"Checking if level {level} can be accessed.")
     # Get prereq for the level
     req = set(level_prerequisites(str(level)))
+    current_app.logger.debug(f"Prerequisites for the level {req}")
     if not req:
         return True  # No prereq, yay!
     if solved is None:
         solved = set()
     else:
-        solved = set(solved)
+        solved = set(s[1] for s in solved)
     remaining = req - solved
     # If nothing remains, user can proceed
     return len(remaining) == 0

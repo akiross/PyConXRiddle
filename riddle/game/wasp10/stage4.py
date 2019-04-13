@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, current_app
 
 from riddle.urls import add_route, on_success
 from riddle.utils import get_user, get_user_flag, set_user_flag
@@ -91,12 +91,12 @@ def entry():
     }
     # Retrieve user id
     user = get_user(session['user_id'])
-    print("Retrieving user ID", user)
+    current_app.logger.debug(f"Retrieving user ID {user}")
 
     # Retrieve user status
     status_key = f"{__name__}/status"
     progress_status = get_user_flag(user['id'], status_key)
-    print("User flag", progress_status)
+    current_app.logger.debug(f"User flag {progress_status}")
 
     # Get answer from form
     for answer in request_value('q_final_1'):
