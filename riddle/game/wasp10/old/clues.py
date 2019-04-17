@@ -52,12 +52,13 @@ second_file = b'''\
 this is the second file
 '''
 
-clue_hashes = {
-    md5(first_file).hexdigest(): 'first_file',
-    md5(second_file).hexdigest(): 'second_file'
-}
+files = {
+    'first.txt': first_file,
+    'second.txt': second_file}
 
-clues_count_needed = 2
+clue_hashes = {md5(f).hexdigest(): n for n, f in files.items()}
+
+clues_count_needed = len(files)
 
 
 @without_answer
@@ -82,7 +83,7 @@ def entry():
         elif correct_clue and correct_clue not in already_upload_clues:
             clues_count += 1
             session['clues_count'] = clues_count
-            session['already_upload_clues'] = f'{already_upload_clues},{correct_clue}'
+            session['already_upload_clues'] = f'{",".join(already_upload_clues)},{correct_clue}'
             if clues_count >= clues_count_needed:
                 return {
                     'content': env.from_string(success_text).render(user=user_id,
@@ -104,9 +105,6 @@ def entry():
 
 
 if __name__ == '__main__':
-    files = {
-        'first.txt': first_file,
-        'second.txt': second_file}
     for n, fo in files.items():
         with open(n, 'w') as f:
             f.write(fo.decode('utf-8'))
