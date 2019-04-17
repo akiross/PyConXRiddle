@@ -167,3 +167,7 @@ def create_app():
             app.logger.exception(f"Unable to load module {n}: {e}")
     app.config['level_map'] = level_map
     return app
+
+
+if __name__ == '__main__':
+    create_app().run(port=5001, debug=True, use_debugger=False, use_reloader=False, passthrough_errors=True)
