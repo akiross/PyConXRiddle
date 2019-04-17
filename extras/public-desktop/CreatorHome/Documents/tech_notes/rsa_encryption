@@ -35,21 +35,21 @@ that is
 	(m^E)^D mod N = m
 	m^(ED) mod N = m
 
-Thanks to Euler, we can do the following
+Thanks to Euler, we can do the following (for given numbers a, p)
 
-	m^phi(p) mod p = 1         i.e.
-	m^phi(p) mod p = 1^k       i.e.
-	m^(k*phi(p)) mod p = 1     i.e.
-	m*m^(k*phi(p)) mod p = m   i.e.
-	m^(k*phi(p)+1) mod p = m   i.e.
+	x^phi(p) mod p = 1         i.e.
+	x^phi(p) mod p = 1^k       i.e.
+	x^(k*phi(p)) mod p = 1     i.e.
+	x*x^(k*phi(p)) mod p = x   i.e.
+	x^(k*phi(p)+1) mod p = x
 
-therefore, we got 
+therefore, we get
 	
-	m^ED mod p = m    with    ED = k*phi(p)+1
+	m^(ED) mod N = m    with    ED = k*phi(N)+1
 
-which allows us to compute the encryption key
+which allows us to compute the key
 
-	D = (k * phi(p) + 1) / E
+	D = (k * phi(N) + 1) / E
 
 Now, this was a simple mathematical derivation for an asymmetric encryption
 scheme, showing that it is possible to encrypt a message using modulo logic
@@ -59,34 +59,34 @@ keys can be different and they are complementary.
 Few elements are still missing:
 
  1. what is the message m? Is that a string?
- 2. what are k, p and e? Are those given? Are those computed?
+ 2. what are k, N and e? Are those given? Are those computed?
  3. how is this schema secure?
  4. how is this schema used in practice?
 
-The schema is secure because it relies on how hard is to compute phi(p):
-that function is easy to compute when p is prime, and also we know that
+The schema is secure because it relies on how hard is to compute phi(N):
+that function is easy to compute when N is prime, and also we know that
 
 	phi(a*b) = phi(a) * phi(b)
 
 therefore if a and b are prime, it is easy to compute phi(a*b). Also, the
 multiplication a*b is easy to compute, but factorizing a*b is not so easy,
-therefore computing phi(p) for a large p that is not prime is hard if it is
-hard to compute the factors of p - which usually is.
+therefore computing phi(N) for a large N that is not prime is hard if it is
+hard to compute the factors of N - which usually is.
 
 So, assuming we have all the bits together, this schema is secure because it is
 easy to "forward compute", but hard to "compute backward" (break it).
 
-The parameters k, p and e are partially given and partially computed:
+The parameters k, N and E are partially given and partially computed:
 
- p: is the product of two (large) primes, as we explained above, if it is hard
-    to factorize, then it is hard to break phi(p), because computing phi(p) is
-    hard if p is not prime.
+ N: is the product of two (large) primes, as we explained above, if it is hard
+    to factorize, then it is hard to break phi(N), because computing phi(N) is
+    hard if N is not prime.
 
  k: is to be found: it is the smallest integer that makes the division have
     null reminder. Therefore, one typically tries k=1,2,3... until the division
     result is an integer.
 
- e: is a (small) odd used as part of a public key.
+ E: is a co-prime with phi(N) that becomes part of the public key.
 
 In practice, one has to get two large prime numbers (typicall Mersenne primes)
 which are multiplied to make p, and phi(p) is computed quickly. Then, e is

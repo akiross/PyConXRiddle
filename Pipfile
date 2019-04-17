@@ -8,12 +8,14 @@ bumpversion = "*"
 ipython = "*"
 flake8 = "*"
 pytest = "*"
+sympy = "*"
 
 [packages]
 flask = "*"
 gunicorn = "*"
 python-dotenv = "*"
 pillow = "*"
+asn1 = "*"
 
 [requires]
 python_version = "3.7"
