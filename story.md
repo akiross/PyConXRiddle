@@ -92,57 +92,106 @@ The user must use the form of the previous level to communicate with the WASP
 team. When enough bits have been sent, the user can proceed to the next level.
 
  1. User searches for old pages with various entry points, the correct one is
-    like /old/stats.php
+    like /wasp9/stats.php
  2. In that page there are statistics which are computer by querying the server
     for instance `<img src="stats.php?command=average&table=something" />`
  3. The user must try to query the page passing SQL commands and break in,
     getting any info he wants.
- 4. In the DB there is a table "hosts" with a couple of SSH addresses:
-    one address shall not be reachable, while the other is the server address.
-	The user shall be able to connect and enstablish a connection which will
-	yield a fixed answer (e.g. via nologin), this shall be sent in some way
-	to the WASP guy that send you the message and you get a confirmation via
-	comment in the source code. The answer should be like "unable to connect to
-	http://(host that did not work):someport/ with user and password".
-	This exact string must be sent to WASP team.
- 5. User must find a way to modify the table so that the server will connect to
-    his host inside the network at a specified port. Doing so, user gets
-	instructions on some code to break.
- 6. Find the agent: some undercover agents were infiltrated in pyconx, they are
+	- Select and Update queries are exposed via SQL injection, so user can
+	  query all the tables and update values. sqlite_sequence is exposed so one
+	  can get all the tables querying that table.
+ 4. In the DB there is a table "hosts" with some addresses:
+    some addresses are bogus, while others will have an effect. A protocol is
+	associated to every IP, so user can take action. One protocol is http, but
+	the user has no clue he has to hijack that. In the table list, the counter
+	table exposes a reset button which shows how to update the table via a
+	reset button.
+ 5. After resetting, user can access the retrieve page to call the http host.
+ 6. The user must update the table so that retrieve page will
+	connect to his host (must be the same subnet!) and post some data.
+	The data is a message from a WASP10 member that gives further instructions.
+ 7. Find the agent: some undercover agents were infiltrated in pyconx, they are
     unaware of being manipolated by the AI (they are wearing QR-codes, each
 	code is giving some points).
-
- 7. To actually pass this level, the user must access a physical terminal that
-    is available at the conference and log in. From there, it must get the
-	private ssh key and upload it to the riddle game level.
+ 8. Player must convince the unaware agent that there is an AI and that they
+    got a message from monty python. They will show you their orders, received
+	as an e-mail with a given number NNN-NNN-NNN. Then give you access to a
+	terminal. Player shall go there to retrieve its IP, than he can connect to
+	it and explore the contents via ssh.
+ 9. To make things harder, the server might disallow ssh password login :)
+	So player must install his ssh public key. Root access is not granted.
 
 ## Apparently the AI is using you to destroy the world
 
-After some digging, you find out that the messages you are getting are from the
-AI itself: it is manipulating the WASP10 contestants to break some codes and
-accessing some systems. Now that it has the public ssh key, the AI can break in
-and subvert the system. The player finds out that the AI was playing a game.
+FIXME player shall stay on the physical terminal the least time possible.
+      that terminal must contain messages and notes, nothing else.
+	  The AI "mind files" must be on another computer, the one with the boss.
 
-When the user accessed the system and gets the private key, he will find a
-background picture with the text "AI WILL RULE THE WORLD".
-In that picture, the first/ast bytes are another (encrypted) URL that shows the
-progress of each user in an hypothetical plan. The user will see the progress
-of all the users in a table like:
+The physical terminal contains an image which helds some secret information
+(steganography): a public RSA key, just a few bits large.
+The image is appropriately displaying the text "AI WILL RULE THE WORLD", which
+was humorously set by the owner of the computer, which is an AI fanboy. On the
+computer, there are some notes written by the owner that show how he thought
+that the only hope for humanity to avoid self-destruction is to build an AI
+that helps the humans to gain freedom from the fear of death.
+This individual, who was a contributor to the PyCon conference, has disappear
+in a tragic accident few months back, so that computer is left there in his
+memory.
 
-	user Foo
-	 - mock challenge [done]
-	 - found mock stats page [done]
-	 - retrieve secret key via physical action [done]
-	user Bar
-	 - mock challenge [done]
-	 - found mock stats page [done]
-	 - retrieve secret key via physical action [waiting]
+Just to make sure the user can solve the level, in the Document directory of
+the terminal there is a "Brief guide on RSA encryption", which explains how
+public/private keys can be used to encrypt a message.
+The user must decipher the image and get the public key. The key must also be
+uploaded somewhere. This is where the AI gets the aid it was seeking from
+the user.
 
-This table was set-up by a little group of Pythonistas who found out the truth
-and are trying to break down the AI. On the computer, in some remote location,
-the user can find the profiles of the people involved (Benci, Miron, etc...).
-By contacting them in real life, they give you a URL with the details to
-help the resistance.
+Then, the user must go back to the info obtained in the host table:
+the telnet/ssh connection will yield an encrypted message, encrypted with the
+associated private key.
+
+Decoding the message will yield a path on the system: a folder full of files.
+Those are the plans of the AI. Since an AI is obviously thinking using a
+non-English language, those files are definitely not in English. Yet, since the
+AI manipulated the agents to make them do what it wants, the AI is using some
+sort of translation table to translate its language to English.
+User has to locate the file NNN-NNN-NNN, which is a numpy array with the same
+length of the message sent to the agents. That file will provide a dictionary
+to decode the AI plans.
+
+User must then read the files and discover the true story: the messages player
+has been getting are from the AI itself: it is manipulating the WASP10
+contestants to break some codes and accessing some systems. Now that it has the
+public ssh key, the AI can break in and subvert the system. The player finds
+out that the AI was playing a game.
+
+--
+What do agents know? They are unaware of the fact that AI has cut off WASP10
+organization. They received an email asking to search for talents.
+Talents are redirected to WASP10 challenge and with it they will try to break
+the code.
+The code must be easily accessible, so that the AI can harness computing power
+to break it, but user should not be able to break that code.
+
+REM When the user accessed the system and gets the private key, he will find a
+REM background picture with the text "AI WILL RULE THE WORLD".
+REM In that picture, the first/ast bytes are another (encrypted) URL that shows the
+REM progress of each user in an hypothetical plan. The user will see the progress
+REM of all the users in a table like:
+REM 
+REM 	user Foo
+REM 	 - mock challenge [done]
+REM 	 - found mock stats page [done]
+REM 	 - retrieve secret key via physical action [done]
+REM 	user Bar
+REM 	 - mock challenge [done]
+REM 	 - found mock stats page [done]
+REM 	 - retrieve secret key via physical action [waiting]
+REM 
+REM This table was set-up by a little group of Pythonistas who found out the truth
+REM and are trying to break down the AI. On the computer, in some remote location,
+REM the user can find the profiles of the people involved (Benci, Miron, etc...).
+REM By contacting them in real life, they give you a URL with the details to
+REM help the resistance.
 
 ## You must hack into the system to destroy the AI
 
@@ -228,3 +277,9 @@ still be secured! (read on google: secure you kvm machine)
    It would be also nice to let users break in and get back their progress,
    for example by retrieving the cookie key in the user database, but then
    we should let users query the DB (read only!).
+ - To create a process that cannot be stopped, it must run with PID 1 (init).
+   Init handles signals in a different way and it can ignore signal 9 and 19.
+   Some info:
+   https://hackernoon.com/my-process-became-pid-1-and-now-signals-behave-strangely-b05c52cc551c
+   https://www.quora.com/Is-it-possible-to-kill-the-init-process-in-Linux-by-the-kill-9-command
+

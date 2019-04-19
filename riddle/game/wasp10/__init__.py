@@ -1,6 +1,6 @@
 import functools
 
-from flask import request, session
+from flask import request, session, url_for
 from textwrap import dedent as dd
 from jinja2 import DictLoader, Environment
 
@@ -65,6 +65,9 @@ env = Environment(
             {% endblock %}'''),
     })
 )
+
+
+env.globals.update(url_for=url_for)
 
 
 deadline = 'Saturday, May 4th'

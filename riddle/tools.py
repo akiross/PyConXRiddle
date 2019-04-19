@@ -1,8 +1,12 @@
 """This module contains (en|de)cryption tools for the game."""
 
+# import numpy as np
+import asn1
+import random
 import itertools
 from PIL import Image
 from textwrap import dedent
+from base64 import b64encode, b64decode
 
 
 def _get_alphabets(alphabet):
@@ -188,6 +192,48 @@ def dumb_primality_test(n):
     return True
 
 
+def _sm_prime_test(n):
+    if n in {0, 1, 4, 6, 8, 9, 10}:
+        return False
+    if n in {2, 3, 5, 7, 11}:
+        return True
+    if n % 2 == 0: # or n % 3 == 0 or n % 5 == 0 or n % 7 == 0:
+        return False
+    return None
+
+
+def _p2fact(n):
+    """Write n as 2^r * d + 1, d odd."""
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        d = d >> 1
+        r += 1
+    return r, d
+
+
+def miller_primality_test(n):
+    """Implement the (deterministic) Miller primality test (True if prime)."""
+    t = _sm_prime_test(n)
+    if t is not None:
+        return t
+
+    r, d = _p2fact(n)
+
+    from math import floor, log
+
+    up = floor(2 * log(n)**2)
+    for a in range(2, min(n - 2, up)):
+        x = pow(a, d, n)  # a ** d % n, but way more efficient
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                continue
+        return False
+    return True
+
+
 def sieve_of_eratosthenes(n):
     """Return the list of primes not greater of n.
     
@@ -213,13 +259,27 @@ def sieve_of_eratosthenes(n):
 
 
 def _dumb_prime_generator():
-    """Generate prime numbers in a very silly way."""
-    p = 2
-    yield p
+    """Generate prime numbers forever and ever until your computer explodes."""
+    yield from [2, 3, 5, 7]
+    p = 8
     while True:
         p += 1
-        if dumb_primality_test(p):  # SLOW!
+        if miller_primality_test(p):
             yield p
+
+
+def generate_big_prime(bits):
+    """Start from random bits and decrement until a prime is found."""
+    if bits <= 1:
+        return None
+    if bits == 2:
+        return random.choice([2, 3])
+    n = random.getrandbits(bits) | 1  # Ensure it's odd
+    # Decrement until a prime is found
+    while n > 5:
+        if miller_primality_test(n):
+            return n
+        n -= 2
 
 
 def prime_generator():
@@ -370,8 +430,68 @@ def read_from_image_bit(img, bit_reader=lsb_reader):
     return bytes(data)
 
 
+class SimpleRSA:
+    """This class implements a simplified RSA to encode and decode bytes."""
+
+    def __init__(self, p, q, exp_size=2**8):
+        """Generate public and private keys for prime numbers p and q."""
+        n = p * q  # Compute modulo
+        z = (p - 1) * (q - 1)  # Euler totient function, phi(n)
+        # Find a prime that does not divide z
+        for k1 in generate_big_prime(exp_size):
+            if k1 in [p, q]:
+                continue
+            if z % k1 != 0:
+                break
+
+        for j in itertools.count(1):
+            k2, r = divmod(j * z + 1, k1)
+            if r == 0:
+                break
+
+        self.public_key = (n, k1)
+        self.private_key = (n, k2)
+
+    def encode(self, msg, key):
+        """Encode a message, one byte at time."""
+        n, k = key
+        cry = []
+        for m in msg:
+            c = m ** k % n
+            cry.append(c)
+        return cry
+
+    def decode(self, cry, key):
+        """Decode a message, one byte at time."""
+        n, k = key
+        msg = bytearray()
+        for c in cry:
+            m = c ** k % n
+            msg.append(m)
+        return msg.decode()
+
+    def serialize_key(self, key):
+        """Serialize a key with ASN.1, b64 encoded."""
+        encoder = asn1.Encoder()
+        encoder.start()
+        # Not really standard
+        encoder.write(key[0], asn1.Numbers.Integer)
+        encoder.write(key[1], asn1.Numbers.Integer)
+        encoder = encoder.output()
+        return b64encode(encoder)
+
+    def deserialize_key(self, key):
+        """Deserialize from b64 and ASN.1."""
+        data = b64decode(key)
+        decoder = asn1.Decoder()
+        decoder.start(data)
+        _, n = decoder.read()
+        _, k = decoder.read()
+        return (n, k)
+
+
 if __name__ == '__main__':
-    if True:
+    if False:
         import time
         from operator import eq
         count = 1000000
@@ -417,3 +537,7 @@ if __name__ == '__main__':
         img2.show()
         print(read_from_image_bit(img2, msb_reader).decode())
 
+    if True:
+        rsa = SimpleRSA(13, 17)
+        print("Generated keys", rsa.serialize_key(rsa.public_key),
+                                rsa.serialize_key(rsa.private_key))

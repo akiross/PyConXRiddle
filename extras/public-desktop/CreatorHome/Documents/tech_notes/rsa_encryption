@@ -1,0 +1,101 @@
+RSA is a very interesting method for public/private crypto. I collected here
+some notes and some math about it, just in case. This gives an overview of the
+general mechanism, but in reality things are more complex.
+
+The idea is to take 2 (large) prime numbers which are used together to generate
+a public and a private key (which are derived from the numbers, they are not
+the numbers). Once these two keys are created, they must be used together to
+cypher a message.
+
+What is neat is that a message (cleartext) can be encrypted by either keys, but
+only the other key can be used do decrypt it:
+
+	cypher = enc(message, key1)
+	assert dec(cypher, key2) == message
+
+The following is also true:
+
+	cypher = enc(message, key)
+	assert dec(cypher, key) != message
+	assert enc(enc(message, key), key) != message
+	assert dec(dec(message, key), key) != message
+
+for both key = key1 or key = key2.
+
+To do so, we can use modulo logic:
+
+	message^E mod N = cypher
+
+and to decrypt:
+
+	cypher^D mod N = message
+
+that is
+
+	(m^E)^D mod N = m
+	m^(ED) mod N = m
+
+Thanks to Euler, we can do the following (for given numbers a, p)
+
+	x^phi(p) mod p = 1         i.e.
+	x^phi(p) mod p = 1^k       i.e.
+	x^(k*phi(p)) mod p = 1     i.e.
+	x*x^(k*phi(p)) mod p = x   i.e.
+	x^(k*phi(p)+1) mod p = x
+
+therefore, we get
+	
+	m^(ED) mod N = m    with    ED = k*phi(N)+1
+
+which allows us to compute the key
+
+	D = (k * phi(N) + 1) / E
+
+Now, this was a simple mathematical derivation for an asymmetric encryption
+scheme, showing that it is possible to encrypt a message using modulo logic
+and decrypt it with the same logic. In addition, the encryption and decryption
+keys can be different and they are complementary.
+
+Few elements are still missing:
+
+ 1. what is the message m? Is that a string?
+ 2. what are k, N and e? Are those given? Are those computed?
+ 3. how is this schema secure?
+ 4. how is this schema used in practice?
+
+The schema is secure because it relies on how hard is to compute phi(N):
+that function is easy to compute when N is prime, and also we know that
+
+	phi(a*b) = phi(a) * phi(b)
+
+therefore if a and b are prime, it is easy to compute phi(a*b). Also, the
+multiplication a*b is easy to compute, but factorizing a*b is not so easy,
+therefore computing phi(N) for a large N that is not prime is hard if it is
+hard to compute the factors of N - which usually is.
+
+So, assuming we have all the bits together, this schema is secure because it is
+easy to "forward compute", but hard to "compute backward" (break it).
+
+The parameters k, N and E are partially given and partially computed:
+
+ N: is the product of two (large) primes, as we explained above, if it is hard
+    to factorize, then it is hard to break phi(N), because computing phi(N) is
+    hard if N is not prime.
+
+ k: is to be found: it is the smallest integer that makes the division have
+    null reminder. Therefore, one typically tries k=1,2,3... until the division
+    result is an integer.
+
+ E: is a co-prime with phi(N) that becomes part of the public key.
+
+In practice, one has to get two large prime numbers (typicall Mersenne primes)
+which are multiplied to make p, and phi(p) is computed quickly. Then, e is
+selected to create a public key. The public key is actually the exponent E and
+modulo N that is used to encode the message as we seen above. The private key
+is the exponent D and N as well.
+p can be freely be diffused because it is hard to break, as explained.
+
+Given E=e, D is computed as shown above, finding the first suitable k.
+Then, the encryption mechanism is applied on every byte of the message to
+produce the encrypted message, which can be deciphered applying the same
+mechanism using the other key.
