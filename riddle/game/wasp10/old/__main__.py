@@ -1,17 +1,27 @@
-#!/usr/bin/python3
-
 """
 Simple tcp server, asks for username and password and checks the pass CRC32
 See https://docs.python.org/3.7/library/asyncio-stream.html#tcp-echo-server-using-streams
+
+Run with python3 -m riddle.game.wasp10.old to start
 """
 
 import asyncio
-from zlib import crc32
+import hashlib
+from base64 import b64encode
+from . import success_message
 
-HOST = "127.0.0.1"
+
+HOST = "0.0.0.0"
 PORT = 8888
 
-GOAL_CRC32 = 3487400559  # pizza
+
+def digest(data):
+    return int.from_bytes(hashlib.blake2b(data, digest_size=3).digest(), 'big')
+
+
+GOAL_USER = b'monty-python'
+GOAL_DIGEST = digest(b'flying circus')
+
 
 MESSAGE = """
               xxxxxxx
@@ -56,18 +66,23 @@ async def handle_connection(reader, writer):
     except asyncio.TimeoutError:
         print("Timeout while reading username or password")
 
+    username = username.strip()
+    password = password.strip()
+
     print(f"Tried to login with username: {username} and password: {password}")
-    if crc32(password.rstrip()) == GOAL_CRC32:
+    if username == GOAL_USER and digest(password) == GOAL_DIGEST:
         writer.write(b"Access granted!\n")
+        writer.write(b64encode(success_message.encode()))
     else:
         writer.write(b"Access denied!\n")
+
     await writer.drain()
     writer.close()
     await writer.wait_closed()
 
 
 async def main():
-    server = await asyncio.start_server(handle_connection, "127.0.0.1", 8888)
+    server = await asyncio.start_server(handle_connection, HOST, PORT)
 
     addr = server.sockets[0].getsockname()
     print(f"Serving on {addr}")
@@ -76,4 +91,5 @@ async def main():
         await server.serve_forever()
 
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
