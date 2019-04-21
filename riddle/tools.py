@@ -237,24 +237,27 @@ def miller_primality_test(n):
 def sieve_of_eratosthenes(n):
     """Return the list of primes not greater of n.
     
-    This uses arbitrarily large integers as boolean array and uses a wheel
-    to skip multiples of 2, 3 and 5.
+    This uses arbitrarily large integers as boolean array
+    and uses a wheel to skip multiples of 2, 3 and 5.
     """
-    skip, start = [2, 3, 5], 7
-    wheel = itertools.cycle([6, 4, 2, 4, 2, 4, 6, 2])
+    primes, start = [2, 3, 5], 7
+    inc = [4, 2, 4, 2, 4, 6, 2, 6]
 
     table = 0
+    wheel = itertools.cycle(inc)
     i, sqrtn = start, n ** 0.5
     while i < sqrtn:
-        if (table >> i) & 1:
-            for j in range(i * i, n, i):
+        if (table >> i) & 1 == 0:
+            for j in range(i * 2, n, i):
                 table |= 1 << j
-        i += next(wheel)  # Skip odd numbers
-    primes = skip
-    for i in range(n):
-        table = table >> 1
-        if table & 1:
+        i += next(wheel)
+
+    wheel = itertools.cycle(inc)
+    i = start
+    while i < n:
+        if (table >> i) & 1 == 0:
             primes.append(i)
+        i += next(wheel)
     return primes
 
 
@@ -491,6 +494,7 @@ class SimpleRSA:
 
 
 if __name__ == '__main__':
+    print(sieve_of_eratosthenes(30))
     if False:
         import time
         from operator import eq
@@ -537,7 +541,7 @@ if __name__ == '__main__':
         img2.show()
         print(read_from_image_bit(img2, msb_reader).decode())
 
-    if True:
+    if False:
         rsa = SimpleRSA(13, 17)
         print("Generated keys", rsa.serialize_key(rsa.public_key),
                                 rsa.serialize_key(rsa.private_key))
