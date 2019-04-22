@@ -2,6 +2,8 @@
 
 import zlib
 import random
+import string
+import hashlib
 import sqlite3
 import datetime
 
@@ -41,7 +43,7 @@ join_date = "2009-10-30"
 
 hosts = (
     # Actually interesting hosts
-    (1, '127.0.0.1', 'telnet'),  # User connects here to get a message
+    (1, '127.0.0.1', 'telnet'),  # Password breaking challenge
     (2, '5.44.12.71', 'http'),  # id=2 will be used by retrieve.php
     # Some random hosts
     # (3, '5.44.12.70', 'ftp'),
@@ -65,10 +67,33 @@ users = (
     ('mena', "go go gadget everything"),
     ('leriomaggio', "from oxford import british_accent"),
     ('__pamaron__', ""),
-    ('viperale', ""),
+    ('viperale', "are we humans or are we dancers"),
     # TODO add others!
     super_user,  # Easily breakable
 )
+
+
+def password_hash(data):
+    """Return an integer value representing the hash of data."""
+    return int.from_bytes(hashlib.blake2b(data, digest_size=2).digest(), 'big')
+
+
+def break_password_hash(target):
+    """Search for a random string with given hash."""
+    import time
+    for b_order in ['big', 'little']:
+        start = time.time()
+        count = 0
+        while True:
+            if time.time() >= start + 60:
+                print("In 60 seconds we did", count, "iterations")
+                count = 0
+                start = time.time()
+            count += 1
+            x = ''.join(random.sample(string.ascii_letters, 10))
+            if password_hash(x.encode()) == target:
+                print("Found", x, "with byte order", b_order)
+                break
 
 
 def get_database(user):
@@ -132,7 +157,7 @@ def get_database(user):
             CREATE TABLE actl (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user TEXT NOT NULL UNIQUE,
-                crc TEXT NOT NULL
+                blake2b_16 TEXT NOT NULL
             );
         ''')
 
@@ -155,7 +180,7 @@ def get_database(user):
                           VALUES (?,?,?)''', h)
 
         for user, pwd in users:
-            db.execute('''INSERT INTO actl (user, crc) VALUES (?,?)''', 
-                       [user, zlib.crc32(pwd.encode())])
+            db.execute('''INSERT INTO actl (user, blake2b_24) VALUES (?,?)''', 
+                       [user, password_hash(pwd.encode())])
 
     return db

@@ -31,9 +31,6 @@ def level_access_verification():
         current_app.logger.info("No user in session, creating a new user")
         session['user_id'] = utils.create_user()
 
-    # for foo in foo:
-    #     print(foo)
-
     # Ensure requested URL can be read
     accessed = request.path[1:]
     current_app.logger.debug(f"Requested path: {accessed}")

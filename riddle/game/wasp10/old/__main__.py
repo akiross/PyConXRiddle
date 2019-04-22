@@ -6,22 +6,15 @@ Run with python3 -m riddle.game.wasp10.old to start
 """
 
 import asyncio
-import hashlib
 from base64 import b64encode
-from . import success_message
+from . import success_message, password_hash
 
 
 HOST = "0.0.0.0"
 PORT = 8888
 
-
-def digest(data):
-    return int.from_bytes(hashlib.blake2b(data, digest_size=3).digest(), 'big')
-
-
 GOAL_USER = b'monty-python'
-GOAL_DIGEST = digest(b'flying circus')
-
+GOAL_DIGEST = password_hash(b'flying circus')
 
 MESSAGE = """
               xxxxxxx
@@ -70,8 +63,10 @@ async def handle_connection(reader, writer):
     password = password.strip()
 
     print(f"Tried to login with username: {username} and password: {password}")
-    if username == GOAL_USER and digest(password) == GOAL_DIGEST:
+    if username == GOAL_USER and password_hash(password) == GOAL_DIGEST:
         writer.write(b"Access granted!\n")
+        # FIXME this solution is NOT giving user any points!
+        # Provide an URL here to give message and points for breaking the code
         writer.write(b64encode(success_message.encode()))
     else:
         writer.write(b"Access denied!\n")

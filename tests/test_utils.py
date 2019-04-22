@@ -147,6 +147,7 @@ def test_user_access(test_app):
                 ['level/riddle', ['riddle', 'level/riddle'], True],
             ]
             for level, solved, expected in cases:
+                solved = [(None, s) for s in solved]
                 assert is_user_allowed(level, solved) == expected
 
         with mock.patch('riddle.utils.get_level_structure') as mockls:
@@ -187,6 +188,7 @@ def test_user_access(test_app):
             ]
 
             for level, solved, expected in cases:
+                solved = [(None, s) for s in solved]
                 assert is_user_allowed(level, solved) == expected
 
         # Ensure dunder files are ignored in the level structure
@@ -204,6 +206,7 @@ def test_user_access(test_app):
                 ['bar/bar', ['foo/foo'], True],
             ]
             for level, solved, expected in cases:
+                solved = [(None, s) for s in solved]
                 assert is_user_allowed(level, solved) == expected
 
 

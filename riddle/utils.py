@@ -215,13 +215,15 @@ def is_user_allowed(level, solved):
     current_app.logger.debug(f"Checking if level {level} can be accessed.")
     # Get prereq for the level
     req = set(level_prerequisites(str(level)))
-    current_app.logger.debug(f"Prerequisites for the level {req}")
+    current_app.logger.debug(f"Prerequisites for the level: {req}")
     if not req:
         return True  # No prereq, yay!
     if solved is None:
         solved = set()
     else:
         solved = set(s[1] for s in solved)
+    current_app.logger.debug(f"Set of solved levels: {solved}")
     remaining = req - solved
+    current_app.logger.debug(f"Remaining to be solved: {remaining}")
     # If nothing remains, user can proceed
     return len(remaining) == 0
