@@ -180,7 +180,7 @@ def get_database(user):
                           VALUES (?,?,?)''', h)
 
         for user, pwd in users:
-            db.execute('''INSERT INTO actl (user, blake2b_24) VALUES (?,?)''', 
+            db.execute('''INSERT INTO actl (user, blake2b_16) VALUES (?,?)''', 
                        [user, password_hash(pwd.encode())])
 
     return db

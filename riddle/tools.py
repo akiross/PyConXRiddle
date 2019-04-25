@@ -271,13 +271,15 @@ def _dumb_prime_generator():
             yield p
 
 
-def generate_big_prime(bits):
+def generate_big_prime(bits, rng=None):
     """Start from random bits and decrement until a prime is found."""
     if bits <= 1:
         return None
+    if rng is None:
+        rng = random
     if bits == 2:
-        return random.choice([2, 3])
-    n = random.getrandbits(bits) | 1  # Ensure it's odd
+        return rng.choice([2, 3])
+    n = rng.getrandbits(bits) | 1  # Ensure it's odd
     # Decrement until a prime is found
     while n > 5:
         if miller_primality_test(n):

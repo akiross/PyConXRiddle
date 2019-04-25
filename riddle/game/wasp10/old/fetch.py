@@ -1,6 +1,6 @@
 """This is a poorly coded statistics page that gives user info."""
 
-import re
+import socket
 
 from http import client
 from pathlib import Path
@@ -87,13 +87,12 @@ def entry():
         target = res.fetchone()[1]
         print("Target database:", target)
 
-    # Ensure host is a valid IP address
-    matches_re = re.fullmatch(r'(?:\d{1,3}\.){3}\d{1,3}', target)
-    if matches_re and all(int(x) in range(256) for x in target.split('.')):
+    try:
+        # Ensure host is a valid IP address
+        socket.inet_aton(target)
         try:
-            target = '127.0.0.1:8080'
             req = urlopen(f'http://{target}',
-                          b64encode(success_message.encode()))
+                          b64encode(success_message.encode())).read(1)
             return {
                 'content': f'Content was retrieved successfully.',
                 'success': True,
@@ -107,7 +106,7 @@ def entry():
                 'content': f'Server closed connection unpexpectedly.',
                 'success': True,
             }
-    else:
+    except socket.error:
         return {
             'content': f'Invalid IP address for host 2, refusing to connect.',
         }
