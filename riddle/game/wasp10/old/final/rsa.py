@@ -64,17 +64,20 @@ def entry():
 
     show_message = False
     if request.method == 'POST':
-        up1 = int(request.form.get('prime1', 0))
-        up2 = int(request.form.get('prime2', 0))
-        up1, up2 = sorted([up1, up2])
-        if up1 == p1 and up2 == p2:
-            return {
-                'content': env.from_string(success_text).render(user=user),
-            }
-        else:
+        try:
+            up1 = int(request.form.get('prime1', 0))
+            up2 = int(request.form.get('prime2', 0))
+            up1, up2 = sorted([up1, up2])
+            if up1 == p1 and up2 == p2:
+                return {
+                    'content': env.from_string(success_text).render(user=user),
+                }
+            else:
+                show_message = True
+        except ValueError:
             show_message = True
 
-    rsa = SimpleRSA(p1, p2)
+    rsa = SimpleRSA(p1, p2, rng=rng)
 
     return {
         'content': env.from_string(game_text).render(
