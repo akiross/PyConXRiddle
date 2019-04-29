@@ -26,3 +26,10 @@ CREATE TABLE user_flag (
   PRIMARY KEY (user_id, flag),
   FOREIGN KEY (user_id) REFERENCES user (id)
 );
+
+
+CREATE TABLE longest_path (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  graph TEXT NOT NULL,
+  len INTEGER NOT NULL
+);
