@@ -438,12 +438,13 @@ def read_from_image_bit(img, bit_reader=lsb_reader):
 class SimpleRSA:
     """This class implements a simplified RSA to encode and decode bytes."""
 
-    def __init__(self, p, q, exp_size=2**8):
+    def __init__(self, p, q, exp_size=8, rng=None):
         """Generate public and private keys for prime numbers p and q."""
         n = p * q  # Compute modulo
         z = (p - 1) * (q - 1)  # Euler totient function, phi(n)
         # Find a prime that does not divide z
-        for k1 in generate_big_prime(exp_size):
+        while True:
+            k1 = generate_big_prime(exp_size, rng)
             if k1 in [p, q]:
                 continue
             if z % k1 != 0:
