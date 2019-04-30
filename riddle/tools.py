@@ -531,33 +531,38 @@ def calculate_graph_longest_path(graph):
     return max(len(el) for el in calc_dfs(0))
 
 
-def eval_expr(s):
+def eval_expr(s, enabled_ops='pn+-*/^%'):
     """Evaluate an expression using ast.
-    
+
     Credits and docs:
      - https://stackoverflow.com/a/9558001
      - https://docs.python.org/3/library/operator.html#mapping-operators-to-functions
     """
-    ops = {
-        ast.Add: operator.add,
-        ast.Sub: operator.sub,
-        ast.USub: operator.neg,
-        ast.UAdd: operator.pos,
-        ast.Mult: operator.mul,
-        ast.Div: operator.truediv,
-        ast.Pow: operator.pow,
-        ast.Mod: operator.mod,
+    # Keep a table of operators that can be used
+    op_table = {
+        'p': (ast.UAdd, operator.pos),
+        'n': (ast.USub, operator.neg),
+        '+': (ast.Add, operator.add),
+        '-': (ast.Sub, operator.sub),
+        '*': (ast.Mult, operator.mul),
+        '/': (ast.Div, operator.truediv),
+        '^': (ast.Pow, operator.pow),
+        '%': (ast.Mod, operator.mod),
     }
 
+    ops = dict(op_table[o] for o in enabled_ops)
+
     def eval_(n):
-        if isinstance(n, ast.Num):
-            return n.n
-        elif isinstance(n, ast.BinOp):
-            return ops[type(n.op)](eval_(n.left), eval_(n.right))
-        elif isinstance(n, ast.UnaryOp):
-            return ops[type(n.op)](eval_(n.operand))
-        else:
-            raise TypeError(n)
+        try:
+            if isinstance(n, ast.Num):
+                return n.n
+            elif isinstance(n, ast.BinOp):
+                return ops[type(n.op)](eval_(n.left), eval_(n.right))
+            elif isinstance(n, ast.UnaryOp):
+                return ops[type(n.op)](eval_(n.operand))
+        except KeyError:
+            raise SyntaxError('unknown token')
+        raise TypeError(n)
     return eval_(ast.parse(s.strip(), mode='eval').body)
 
 

@@ -21,9 +21,11 @@ entry_text = '''{% extends "form" %}
     <p>You will still be able to review your answer before submitting.</p>
     {% call open_question("q_final_1") -%}
         <p>Please compute the distance between 0 and most distant edge of this graph:</p>
+        <pre>
         {% for k, v in graph.items() %}
-            <p> {{k}} --> {% for el in v %} {{el}} {% endfor %} </p>
+            {{k}} → {% for el in v %} {{el}} {% endfor %}
         {% endfor %}
+        </pre>
     {%- endcall %}
     {{ hidden_field("stage", stage_num) }}
     {{ submit_button("Proceed") }}

@@ -1,3 +1,4 @@
+import re
 import functools
 
 from flask import request, session, url_for
@@ -57,7 +58,7 @@ env = Environment(
             {% block stage %}Stage {{ stage_num }}{% endblock %}
             {% block form %}
                 {% for question in questions %}
-                    {% call open_question(question.__name__) %}
+                    {% call open_question(question.__name__, question.__annotations__.get('return', "Your answer here")) %}
                         {{ question.__doc__ }}
                     {% endcall %}
                 {% endfor %}
@@ -76,20 +77,36 @@ env.globals.update(add_help_message=add_help_message)
 deadline = 'Saturday, May 4th'
 
 
-def validate(validator, strip=True):
+def flexible_complex(s):
+    """Converts to complex a number that is both x+yj and yj+x.
+    Built-in complex() won't parse the second case.
+    """
+    m = re.match('()', s)
+
+
+def validate(validator, strip=True, check_only=False, ignore_spaces=True):
     """Validate input by calling validator and returning None on exception.
     This decorator should be applied to question functions to ensure that
     given answer is of the expected type. If validator raises an exception,
     the decorated function will silently return None, as the input is
     considered invalid.
+    If check_only is True, then the (bool) output of validator will be used to
+    check if the validation passes or not.
     """
+    spaces = re.compile(r'\s+')
     def _deco(f):
         @functools.wraps(f)
         def _func(ans):
             if strip:
                 ans = ans.strip()
+            if ignore_spaces:
+                ans = re.sub(spaces, '', ans)
             try:
-                ans = validator(ans)
+                if check_only:
+                    if not validator(ans):
+                        return None
+                else:
+                    ans = validator(ans)
             except:  # Catch all the exceptions!
                 return None  # We count this answer as not given
             return f(ans)  # Call function outside the try-catch
@@ -118,6 +135,7 @@ def make_entry_point(stage, questions, on_answer):
             for i, question in enumerate(questions):
                 for answer in request_value(question.__name__):
                     answers[i] = question(answer)
+                    print("Question", question.__name__, "was", "passed" if answers[i] else "failed")
             # Return 
             score = sum(bool(a) for a in answers)
             if get_user_flag(session['user_id'], 'sanity-status') is not None:
