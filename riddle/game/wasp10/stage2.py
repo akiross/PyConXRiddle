@@ -14,7 +14,7 @@ def q_math_1(ans):
 @questions.append
 @validate(complex)
 def q_math_2(ans):
-    """Compute $(7+4j)\cdot(17-5j)$."""
+    """Compute $(7+4j)\\cdot(17-5j)$."""
     return ans == (139+33j)
 
 

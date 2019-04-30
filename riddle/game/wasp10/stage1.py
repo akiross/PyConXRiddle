@@ -28,8 +28,8 @@ def q_math_2(ans):
 @questions.append
 @validate(float)
 def q_math_3(ans):
-    """Given the function $$f(n) = \sum_{i=0}^{n}{i}$$ compute
-    $$\prod_{n=0}^{50000}{f(n)}$$.
+    """Given the function $$f(n) = \\sum_{i=0}^{n}{i}$$ compute
+    $$\\prod_{n=0}^{50000}{f(n)}$$.
     """
     return ans == 0
 
