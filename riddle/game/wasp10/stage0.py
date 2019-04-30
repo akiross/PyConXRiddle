@@ -6,7 +6,7 @@ from jinja2 import Environment, Template
 from flask import session, request
 
 from riddle.utils import create_user, get_user
-from riddle.urls import without_answer
+from riddle.urls import without_answer, add_route
 
 from . import env, deadline
 
@@ -121,6 +121,7 @@ entry_text = '''{% extends "base" %}
 
 
 @without_answer
+@add_route('/')
 def entry():
     user = get_user(session['user_id'])
     page = {

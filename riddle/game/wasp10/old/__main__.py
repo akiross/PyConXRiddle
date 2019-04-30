@@ -5,9 +5,10 @@ See https://docs.python.org/3.7/library/asyncio-stream.html#tcp-echo-server-usin
 Run with python3 -m riddle.game.wasp10.old to start
 """
 
+import logging
 import asyncio
-from base64 import b64encode
-from . import success_message, password_hash
+from . import password_hash
+from .message import encrypted_url
 
 
 HOST = "0.0.0.0"
@@ -57,17 +58,16 @@ async def handle_connection(reader, writer):
         writer.write(b"Password: ")
         password = await asyncio.wait_for(reader.read(1024), timeout=60)
     except asyncio.TimeoutError:
-        print("Timeout while reading username or password")
+        logging.info("Timeout while reading username or password")
 
     username = username.strip()
     password = password.strip()
 
-    print(f"Tried to login with username: {username} and password: {password}")
+    logging.info(f"Tried to login with username: {username} and password: {password}")
     if username == GOAL_USER and password_hash(password) == GOAL_DIGEST:
         writer.write(b"Access granted!\n")
-        # FIXME this solution is NOT giving user any points!
-        # Provide an URL here to give message and points for breaking the code
-        writer.write(b64encode(success_message.encode()))
+        # This url gives points to the user
+        writer.write(encrypted_url.encode())
     else:
         writer.write(b"Access denied!\n")
 
@@ -80,11 +80,12 @@ async def main():
     server = await asyncio.start_server(handle_connection, HOST, PORT)
 
     addr = server.sockets[0].getsockname()
-    print(f"Serving on {addr}")
+    logging.info(f"Serving on {addr}")
 
     async with server:
         await server.serve_forever()
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

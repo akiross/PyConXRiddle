@@ -80,17 +80,11 @@ error_text = '''{% extends "base" %}
 '''
 
 
-def random_date(start_date, end_date):
-    start_date = datetime.date.fromisoformat(start_date)
-    end_date = datetime.date.fromisoformat(end_date)
-    print("Time diff", end_date - start_date)
-
-
 @without_answer
 @add_route("/wasp9/stats.php", endpoint="wasp9_stats")
 def entry():
     user = get_user(session['user_id'])
-    print("GOT USER DATA", user)
+    # print("GOT USER DATA", user)
     db = get_database(user)
 
     # Make this mutable
@@ -127,7 +121,7 @@ def entry():
             where = ' and '.join(f'{f} = "{v}"' for f, v in args.items())
             if where:
                 query += f' WHERE {where}'
-            print("query", query)
+            # print("query", query)
             with db:
                 ans = db.execute(query)
                 descriptions = [d[0].replace('_', ' ').title()
@@ -138,7 +132,7 @@ def entry():
                     'header': descriptions,
                     'rows': rows,
                 }]
-                print("ans", answers)
+                # print("ans", answers)
 
                 if "Value" in descriptions:
                     pos = descriptions.index("Value")
@@ -161,7 +155,7 @@ def entry():
             update = args.pop('update')
             query = f'UPDATE {update} SET '
             query += ', '.join([f'{col} = "{val}"' for col, val in args.items()])
-            print("query", query)
+            # print("query", query)
             with db:
                 db.execute(query)
                 args = dict(user=user, message="Updated successfully.")

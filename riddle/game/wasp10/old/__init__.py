@@ -56,9 +56,11 @@ hosts = (
     (9, '20.19.5.5', 'pcx'),
 )
 
-# Let's give PyConX organizers some credit :)
 users = (
-    ('patrick91', "thank you for the birthday gift, marilyn"),
+    # Let's give PyConX organizers some credit :)
+    # Those are some of the many members who made PyConX possible
+    # The passwords are there just for fun, let's hope they enjoy them!
+    ('patrick91', "thank you for the birthday gift, Marilyn"),
     ('davidmugnai', "measure once, cut once, fix once"),
     ('hype_fi', "impossible is just a matter of time"),
     ('simbasso', "we should not test in production"),
@@ -66,9 +68,11 @@ users = (
     ('yakkys', "d-j-a-n-g-o, the d is silent"),
     ('mena', "go go gadget everything"),
     ('leriomaggio', "from oxford import british_accent"),
-    ('__pamaron__', ""),
-    ('viperale', "are we humans or are we dancers"),
-    # TODO add others!
+    ('__pamaron__', "for the holy Mary"),
+    ('viperale', "human body is 90% water, mine is 90% spritz"),
+    ('rasky', "optimising life"),
+    ('fiorella', "I am tooooo cute"),
+    # Back to the game
     super_user,  # Easily breakable
 )
 
