@@ -20,7 +20,7 @@ entry_text = '''{% extends "form" %}
     answer incorrectly, you will not be able to continue the challenge.</p>
     <p>You will still be able to review your answer before submitting.</p>
     {% call open_question("q_final_1") -%}
-        <p>Please compute the disnce between 0 and most distant edge of this graph:</p>
+        <p>Please compute the distance between 0 and most distant edge of this graph:</p>
         {% for k, v in graph.items() %}
             <p> {{k}} --> {% for el in v %} {{el}} {% endfor %} </p>
         {% endfor %}
