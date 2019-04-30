@@ -70,7 +70,7 @@ def entry():
     graph_id, graph, llength = get_graph() if graph_id is None else get_graph(graph_id)
     session['graph_id'] = graph_id
     graph = json.loads(graph)
-    print(graph_id)
+    current_app.logger.info(f'{user} has been assigned {graph_id} graph id')
     # Get answer from form
     for answer in request_value('q_final_1'):
         return {
