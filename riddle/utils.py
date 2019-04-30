@@ -2,7 +2,7 @@ import sqlite3
 import random
 from pathlib import Path
 
-from flask import current_app
+from flask import current_app, session
 
 from riddle import database
 from riddle.names import generate_random_animal
@@ -277,6 +277,7 @@ def get_graph(id_=None):
 
 def add_help_message():
     # could also check if sanity is tainted
-    if not random.randint(0, 9):  # triggered 10% of the times
+    user_flag = get_user_flag(session['user_id'], 'sanity-status')
+    if not random.randint(0, 1) and user_flag is not None:
         return f'<!--\n{help_message}\n--> p>'
     return ''
