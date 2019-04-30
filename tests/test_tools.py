@@ -229,4 +229,8 @@ def test_img_steganography(img_bytes, bit, in_data, out_data):
     ('three + four', None),
 ])
 def test_eval_expr(expr, result):
-    assert tools.eval_expr(expr) == result
+    if result is not None:
+        assert tools.eval_expr(expr) == result
+    else:
+        with pytest.raises(TypeError):
+            tools.eval_expr(expr)

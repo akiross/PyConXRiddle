@@ -558,10 +558,7 @@ def eval_expr(s):
             return ops[type(n.op)](eval_(n.operand))
         else:
             raise TypeError(n)
-    try:
-        return eval_(ast.parse(s.strip(), mode='eval').body)
-    except TypeError:
-        return None
+    return eval_(ast.parse(s.strip(), mode='eval').body)
 
 
 if __name__ == '__main__':
