@@ -37,14 +37,18 @@ entry_text = '''\
 '''
 
 # FIXME better file loading
-FILES_LOC = '/home/akiross/Projects/PyConXRiddle/extras/public-desktop/CreatorHome/Documents/humans/29938924/'
+FILES_LOC = Path(__file__) \
+    .absolute() \
+    .parents[4] / 'extras/public-desktop/CreatorHome/Documents/humans/29938924/'
 files = {f.stem: f.open().read.encode() for f in Path(FILES_LOC).glob('*')}
-        #{f: open(f'{FILES_LOC}/{f}').read().encode()
-        # for f in 'contest e-mail riddle wasp10'.split()}
+
+# {f: open(f'{FILES_LOC}/{f}').read().encode()
+# for f in 'contest e-mail riddle wasp10'.split()}
 
 clue_hashes = {md5(f).hexdigest(): n for n, f in files.items()}
 
 clues_count_needed = len(files)
+
 
 @on_success(redirect='/wasp9/breakin')
 @add_route("/wasp9/clues.php", endpoint="wasp9_clues", methods=['GET', 'POST'])

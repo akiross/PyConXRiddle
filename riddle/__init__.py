@@ -129,6 +129,8 @@ def create_app():
 
     app.teardown_appcontext(database.close_connection)
     app.cli.add_command(cli.init_db)
+    app.cli.add_command(cli.write_stega_image)
+    app.cli.add_command(cli.populate_longest_path)
 
     app.before_request(level_access_verification)
 

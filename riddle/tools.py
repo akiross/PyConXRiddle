@@ -5,6 +5,7 @@ import asn1
 import random
 import itertools
 from PIL import Image
+from collections import defaultdict
 from textwrap import dedent
 from base64 import b64encode, b64decode
 
@@ -494,6 +495,38 @@ class SimpleRSA:
         _, n = decoder.read()
         _, k = decoder.read()
         return (n, k)
+
+
+def make_highly_variable_graph(n):
+    graph = defaultdict(set)
+    for i in range(n):
+        for j in range(random.randint(0, n)):
+            if random.random() > 0.5 and i != j:
+                graph[i].add(j)
+    for i in range(3):
+        graph[0].add(random.randint(1, n))
+    return graph
+
+
+def calculate_graph_longest_path(graph):
+
+    def calc_dfs(v, seen=None, path=None):
+        if seen is None:
+            seen = []
+        if path is None:
+            path = [v]
+
+        seen.append(v)
+
+        paths = []
+        for t in graph[v]:
+            if t not in seen:
+                t_path = path + [t]
+                paths.append(tuple(t_path))
+                paths.extend(calc_dfs(t, seen[:], t_path))
+        return paths
+
+    return max(len(el) for el in calc_dfs(0))
 
 
 if __name__ == '__main__':
