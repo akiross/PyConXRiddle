@@ -1,4 +1,5 @@
 import json
+import time
 
 import click
 import flask
@@ -33,14 +34,21 @@ def write_stega_image(message, img_source_path, img_dest_path):
 
 
 @click.command('populate-longest-path')
-@click.option('-n', type=int, default=50)
+@click.option('-n', type=int, default=25)
+@click.option('-m', type=int, default=19)
 @flask.cli.with_appcontext
-def populate_longest_path(n):
+def populate_longest_path(n, m):
     db = database.get_connection()
     for i in range(n):
-        click.echo(f'creating graph {i}')
-        graph = make_highly_variable_graph()
-        length = calculate_graph_longest_path(graph)
+        while True:
+            t0 = time.time()
+            graph = make_highly_variable_graph(m)
+            length = calculate_graph_longest_path(graph)
+            elapsed = time.time() - t0
+            click.echo(f'processing graph {i} found path in {elapsed}')
+            if elapsed >= 0.1:
+                break
+            print('skipping graph: solved too fast')
         graph = json.dumps({k: list(v) for k, v in graph.items()})
         db.execute(
             'INSERT INTO longest_path (graph, len) VALUES (?,?)',

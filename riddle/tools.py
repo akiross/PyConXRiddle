@@ -497,8 +497,7 @@ class SimpleRSA:
         return (n, k)
 
 
-def make_highly_variable_graph():
-    n = 20
+def make_highly_variable_graph(n):
     graph = defaultdict(set)
     for i in range(n):
         for j in range(random.randint(0, n)):

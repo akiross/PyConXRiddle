@@ -5,7 +5,7 @@ from textwrap import dedent as dd
 from jinja2 import DictLoader, Environment
 
 from riddle import urls
-from riddle.utils import create_user, get_user
+from riddle.utils import create_user, get_user, get_user_flag, add_help_message
 
 
 env = Environment(
@@ -39,6 +39,7 @@ env = Environment(
             <body>
             <div>User info: {{ user }}</div>
             {% block body %}{% endblock %}
+            {{ add_help_message() }}
             </body>
             </html>'''),
         'form': dd('''\
@@ -68,6 +69,8 @@ env = Environment(
 
 
 env.globals.update(url_for=url_for)
+env.globals.update(add_help_message=add_help_message)
+
 
 
 deadline = 'Saturday, May 4th'
@@ -116,8 +119,11 @@ def make_entry_point(stage, questions, on_answer):
                 for answer in request_value(question.__name__):
                     answers[i] = question(answer)
             # Return 
+            score = sum(bool(a) for a in answers)
+            if get_user_flag(session['user_id'], 'sanity-status') is not None:
+                score = 0
             return {
-                'score': sum(bool(a) for a in answers),
+                'score': score,
                 'answer': 'pass',  # Consider the stage solved
             }
         else:
