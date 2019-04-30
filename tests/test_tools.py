@@ -209,3 +209,24 @@ def test_img_steganography(img_bytes, bit, in_data, out_data):
     assert tuple(steg_img.tobytes()) == img_bytes
     # Read back data and check
     assert tools.read_from_image_bit(steg_img, reader) == out_data
+
+
+@pytest.mark.parametrize('expr,result', [
+    # Test numbers
+    ('123', 123), ('-123', -123), ('+123', +123),
+    ('123.45', 123.45), ('-123.45', -123.45), ('+3.25e-6', +3.25e-6),
+    ('123+321j', 123+321j), ('-123-321j', -123-321j), ('123j+321', 123j+321),
+    # Test operator precedence and parens
+    ('123+321', 123+321), ('123-321', 123-321),
+    ('123*321+123', 123*321+123), ('(123*321)-123', (123*321)-123),
+    # Test operators
+    ('-1+2-3*4**5/-6%+7', -1+2-3*4**5/-6%+7),
+    # Test formatting
+    ('   123    +    321   ', 123+321),
+    # Test invalid values
+    ('hello+3', None),
+    ('3 * world', None),
+    ('three + four', None),
+])
+def test_eval_expr(expr, result):
+    assert tools.eval_expr(expr) == result

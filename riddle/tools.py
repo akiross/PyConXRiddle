@@ -1,8 +1,10 @@
 """This module contains (en|de)cryption tools for the game."""
 
 # import numpy as np
+import ast
 import asn1
 import random
+import operator
 import itertools
 from PIL import Image
 from collections import defaultdict
@@ -527,6 +529,39 @@ def calculate_graph_longest_path(graph):
         return paths
 
     return max(len(el) for el in calc_dfs(0))
+
+
+def eval_expr(s):
+    """Evaluate an expression using ast.
+    
+    Credits and docs:
+     - https://stackoverflow.com/a/9558001
+     - https://docs.python.org/3/library/operator.html#mapping-operators-to-functions
+    """
+    ops = {
+        ast.Add: operator.add,
+        ast.Sub: operator.sub,
+        ast.USub: operator.neg,
+        ast.UAdd: operator.pos,
+        ast.Mult: operator.mul,
+        ast.Div: operator.truediv,
+        ast.Pow: operator.pow,
+        ast.Mod: operator.mod,
+    }
+
+    def eval_(n):
+        if isinstance(n, ast.Num):
+            return n.n
+        elif isinstance(n, ast.BinOp):
+            return ops[type(n.op)](eval_(n.left), eval_(n.right))
+        elif isinstance(n, ast.UnaryOp):
+            return ops[type(n.op)](eval_(n.operand))
+        else:
+            raise TypeError(n)
+    try:
+        return eval_(ast.parse(s.strip(), mode='eval').body)
+    except TypeError:
+        return None
 
 
 if __name__ == '__main__':
