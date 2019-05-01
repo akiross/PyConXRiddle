@@ -43,6 +43,11 @@ def level_access_verification():
     if '/'+accessed not in routes:
         current_app.logger.info("Cannot find level, should be 404")
         return None  # Let this be handled by a 404
+
+    if current_app.config.get('UNCONFINED', False):
+        current_app.logger.warn("Unconfined access enabled")
+        return None
+
     # Query user progress and check permissions
     progress = list(p[:2] for p in utils.query_user_progress(session['user_id']))
     current_app.logger.debug(f"Player progress {progress}")
