@@ -209,3 +209,56 @@ def test_img_steganography(img_bytes, bit, in_data, out_data):
     assert tuple(steg_img.tobytes()) == img_bytes
     # Read back data and check
     assert tools.read_from_image_bit(steg_img, reader) == out_data
+
+
+@pytest.mark.parametrize('expr,result', [
+    # Test numbers
+    ('123', 123), ('-123', -123), ('+123', +123),
+    ('123.45', 123.45), ('-123.45', -123.45), ('+3.25e-6', +3.25e-6),
+    ('123+321j', 123+321j), ('-123-321j', -123-321j), ('123j+321', 123j+321),
+    # Test operator precedence and parens
+    ('123+321', 123+321), ('123-321', 123-321),
+    ('123*321+123', 123*321+123), ('(123*321)-123', (123*321)-123),
+    # Test operators
+    ('-1+2-3*4**5/-6%+7', -1+2-3*4**5/-6%+7),
+    # Test unknown operator
+    ('1$2', SyntaxError),
+    # Test formatting
+    ('   123    +    321   ', 123+321),
+    # Test invalid values
+    ('hello+3', TypeError),
+    ('3 * world', TypeError),
+    ('three + four', TypeError),
+])
+def test_eval_expr(expr, result):
+    if not isinstance(result, type):
+        assert tools.eval_expr(expr) == result
+    else:
+        with pytest.raises(result):
+            tools.eval_expr(expr)
+
+
+# Test that we can enable custom operators when evaluating
+@pytest.mark.parametrize('expr,ops,result', [
+    ('123', '', 123), ('-123', '', SyntaxError), ('+123', '', SyntaxError),
+    ('-123', '-', SyntaxError), ('+123', '+', SyntaxError),
+    ('-123', 'n', -123), ('+123', 'p', 123),
+    ('-123', 'np', -123), ('+123', 'pn', 123),
+    ('123+12', '+', 123+12), ('123+12', 'pn-*/%^', SyntaxError),
+    ('123-12', '-', 123-12), ('123-12', 'pn+*/%^', SyntaxError),
+    ('123*12', '*', 123*12), ('123*12', 'pn+-/%^', SyntaxError),
+    ('123/12', '/', 123/12), ('123/12', 'pn+-*%^', SyntaxError),
+    ('123%12', '%', 123%12), ('123%12', 'pn+-*/^', SyntaxError),
+    ('123**12', '^', 123**12), ('123**12', 'pn+-*/%', SyntaxError),
+    # Test with complex numbers as well, as we need in stage1
+    ('12+3j', 'pn+-', 12+3j),
+    ('-12-3j', 'pn+-', -12-3j),
+    ('+3j+12', 'pn+-', 12+3j),
+    ('-3j-12', 'pn+-', -12-3j),
+])
+def test_eval_expr_custom_ops(expr, ops, result):
+    if not isinstance(result, type):
+        assert tools.eval_expr(expr, ops) == result
+    else:
+        with pytest.raises(result):
+            tools.eval_expr(expr, ops)

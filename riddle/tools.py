@@ -1,8 +1,10 @@
 """This module contains (en|de)cryption tools for the game."""
 
 # import numpy as np
+import ast
 import asn1
 import random
+import operator
 import itertools
 from PIL import Image
 from collections import defaultdict
@@ -527,6 +529,41 @@ def calculate_graph_longest_path(graph):
         return paths
 
     return max(len(el) for el in calc_dfs(0))
+
+
+def eval_expr(s, enabled_ops='pn+-*/^%'):
+    """Evaluate an expression using ast.
+
+    Credits and docs:
+     - https://stackoverflow.com/a/9558001
+     - https://docs.python.org/3/library/operator.html#mapping-operators-to-functions
+    """
+    # Keep a table of operators that can be used
+    op_table = {
+        'p': (ast.UAdd, operator.pos),
+        'n': (ast.USub, operator.neg),
+        '+': (ast.Add, operator.add),
+        '-': (ast.Sub, operator.sub),
+        '*': (ast.Mult, operator.mul),
+        '/': (ast.Div, operator.truediv),
+        '^': (ast.Pow, operator.pow),
+        '%': (ast.Mod, operator.mod),
+    }
+
+    ops = dict(op_table[o] for o in enabled_ops)
+
+    def eval_(n):
+        try:
+            if isinstance(n, ast.Num):
+                return n.n
+            elif isinstance(n, ast.BinOp):
+                return ops[type(n.op)](eval_(n.left), eval_(n.right))
+            elif isinstance(n, ast.UnaryOp):
+                return ops[type(n.op)](eval_(n.operand))
+        except KeyError:
+            raise SyntaxError('unknown token')
+        raise TypeError(n)
+    return eval_(ast.parse(s.strip(), mode='eval').body)
 
 
 if __name__ == '__main__':
