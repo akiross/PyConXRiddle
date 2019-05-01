@@ -83,6 +83,8 @@ def entry():
     for answer in request_value('final_answer'):
         if verify(answer, llength):
             set_user_flag(user['id'], status_key, 'tainted')
+            graph_id, _, _ = get_graph()
+            session['graph_id'] = graph_id
             return {
                 'answer': 'pass'
             }
