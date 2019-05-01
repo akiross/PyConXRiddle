@@ -117,9 +117,9 @@ def create_app():
     app = Flask(__name__, static_folder=None)
     app.config.from_envvar('RIDDLE_CONFIG')
 
-    app.static_url_path = app.config.get('STATIC_PATH', 'static')
+    app.static_folder = app.config.get('STATIC_PATH', 'static')
     app.add_url_rule(
-        f'/{app.static_url_path}/<path:filename>',
+        f'/static/<path:filename>',
         endpoint='static',
         view_func=app.send_static_file)
 
