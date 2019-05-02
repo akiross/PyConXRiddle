@@ -20,9 +20,24 @@ entry_text = '''{% extends "form" %}
     answer incorrectly, you will not be able to continue the challenge.</p>
     <p>You will still be able to review your answer before submitting.</p>
     {% call open_question("q_final_1") -%}
-        <p>Please compute the distance between 0 and most distant edge of this graph:</p>
-        <pre>{%- for k, v in graph.items() %}{{k}} → {% for el in v %}{{el}} {% endfor %}
-{% endfor %}</pre>
+        <p>In order to complete this task you wll need to calculate the
+        <a href="https://en.wikipedia.org/wiki/Longest_path_problem" target="_blank">longest path</a> 
+        between the node 0 and every other node of this graph:</p>
+        {%- for k, v in graph.items() %}<p>{{k}} → {% for el in v %}{{el}} {% endfor %}</p>{% endfor %}
+        <p>For example starting from this graph:</p>
+            <p> 0 -> 1 2 </p>
+            <p> 1 -> 3 4 </p>
+            <p> 3 -> 2 </p>
+            <p> 2 -> 4 </p>
+        <p>The valid paths are:</p>
+            <p>0 1</p>
+            <p>0 2</p>
+            <p>0 1 3</p>
+            <p>0 1 4</p>
+            <p>0 2 4</p>
+            <p>0 1 3 2</p>
+            <p>0 1 3 2 4</p>
+        <p>Therefore the longest path is 5</p>
     {%- endcall %}
     {{ hidden_field("stage", stage_num) }}
     {{ submit_button("Proceed") }}
