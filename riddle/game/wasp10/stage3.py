@@ -52,4 +52,4 @@ def q_logic_3(ans) -> "Real e.g. 123.45":
 
 
 # We move to next page regardless the correctness of the answer
-entry = make_entry_point(1, questions, '/wasp10/stage4')
+entry = make_entry_point(3, questions, '/wasp10/stage4')

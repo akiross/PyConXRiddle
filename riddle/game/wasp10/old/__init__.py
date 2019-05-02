@@ -22,17 +22,17 @@ super_user = ("monty-python", "flying circus")
 success_message = f'''
 If you are reading this message, it means you made it: I am {super_user[0]},
 one of the funding members of the WASP10 association and I found the hole in
-the system that you just exploited to get this message. Sorry if we were not
+the system that I just exploited to get this message. Sorry if we were not
 very explicit in telling how to come here, but trust is fundamental in this
 phase. I would like to let you know that you are not alone, and the number of
-people fighting the EAI must continue growing.
+people fighting the EAI must continue to grow.
 At the venue, there are some WASP10 undercover agents that have been sent there
 to scout talents and invite them to participate in the competition. Those
 agents are still unaware of the fact that an EAI overtook our communications.
 Your job is now to find them and inform them of what is happening.
-You must gain their trust and let them know the truth. They will give you the
-necessary information to break into the system and break the AI. When you find
-them, don't forget my name.
+You must gain their trust and let them know the truth. They might help you in 
+getting the necessary information to break into the system and destroy the AI.
+When you find them, don't forget my name.
 Good luck.
 '''
 # But... WASP10 is now public, why having undercover agents? Why do they need

@@ -1,7 +1,7 @@
 import re
 import functools
 
-from flask import request, session, url_for
+from flask import request, session, url_for, current_app
 from textwrap import dedent as dd
 from jinja2 import DictLoader, Environment
 
@@ -19,6 +19,7 @@ env = Environment(
                     <label for="{{ field_name }}">Answer</label>
                     <input type="text" name="{{ field_name }}" placeholder="{{ placeholder }}">
                 </div>
+                <hr/>
             </div>
             {% endmacro %}
             {% macro hidden_field(name, value) %}
@@ -36,9 +37,9 @@ env = Environment(
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>{% block title %}{% endblock %}</title>
+            <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
             </head>
             <body>
-            <div>User info: {{ user }}</div>
             {% block body %}{% endblock %}
             {{ add_help_message() }}
             </body>
@@ -134,7 +135,12 @@ def make_entry_point(stage, questions, on_answer):
             answers = [None] * len(questions)
             for i, question in enumerate(questions):
                 for answer in request_value(question.__name__):
-                    answers[i] = question(answer)
+                    try:
+                        answers[i] = question(answer)
+                    except:
+                        # In case of exception, assume it is not passed
+                        current_app.logger.warn(f"Error while checking answer '{answer}' in question {question.__name__}")
+                        answers[i] = False
                     print("Question", question.__name__, "was", "passed" if answers[i] else "failed")
             # Return 
             score = sum(bool(a) for a in answers)

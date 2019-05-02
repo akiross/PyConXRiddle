@@ -16,9 +16,9 @@ entry_text = '''{% extends "form" %}
 {% block stage %}Stage {{ stage_num }}{% endblock %}
 {% block form %}
     <p>Alright, you completed the preliminary parts of the challenge and we
-    are now entering the final phase: from now on, no errors are allowed. If you
-    answer incorrectly, you will not be able to continue the challenge.</p>
-    <p>You will still be able to review your answer before submitting.</p>
+    are now entering the final phase: from now on, no errors are allowed.
+    You will not be able to continue the challenge until the correct answer is
+    given.</p>
     {% call open_question("q_final_1") -%}
         <p>In order to complete this task you wll need to calculate the
         <a href="https://en.wikipedia.org/wiki/Longest_path_problem" target="_blank">longest path</a> 
