@@ -615,9 +615,19 @@ if __name__ == '__main__':
         img = Image.open("../demo_image.jpg")
         img2 = write_to_image_bit(img, 'Hello there! ☺'.encode(), msb_writer)
         img2.show()
+        img2.save("./encoded.png")
         print(read_from_image_bit(img2, msb_reader).decode())
 
     if False:
         rsa = SimpleRSA(13, 17)
         print("Generated keys", rsa.serialize_key(rsa.public_key),
                                 rsa.serialize_key(rsa.private_key))
+
+    if True:
+        text = input("Insert the text you want to encode (will be stripped): ")
+        text = text.strip()
+
+        img = Image.open(input("Path for input image: "))
+        img2 = write_to_image_bit(img, text.encode(), lsb_writer)
+        img2.save(input("Path for output image: "))
+        print(read_from_image_bit(img2, lsb_reader).decode())

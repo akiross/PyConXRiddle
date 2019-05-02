@@ -1,6 +1,7 @@
 import random
 
-from flask import session, request
+from pathlib import Path
+from flask import session, request, current_app
 
 from riddle.urls import add_route
 from riddle.utils import get_user
@@ -16,7 +17,13 @@ game_text = '''\
     internally by the AI, we are now able to understand its thoughts! This
     gives us the ability to tear it down, but before that we need to break in
     the system.</p>
-    <p>To do so, we can try to get a remote shell on the machine, but to get
+    <p>Here, this is the knowledge we extracted from the brain!</p>
+    <ul>
+    {% for url, name in brain_files %}
+        <li><a href="/{{url}}">{{name}}</a></li>
+    {% endfor %}
+    </ul>
+    <p>To break in, we can try to get a remote shell on the machine, but to get
     in we need a key. Apparently, the AI is using some sort of public key
     encryption method to authorize incoming connections to it. I found this
     public key: we need to break it! Help me finding the two factors that
@@ -55,6 +62,12 @@ success_text = '''\
 def entry():
     user = get_user(session.get('user_id'))
 
+    # Get the translated files
+    root = Path(current_app.static_folder) 
+    content = root / 'humans' / 'plans'
+    brain = [(str(p.relative_to(root.parent)), p.name)
+             for p in content.glob('**/*')]
+
     # Generate two unique primes for this user
     rng = random.Random()
     rng.seed(user['id'])
@@ -71,6 +84,7 @@ def entry():
             if up1 == p1 and up2 == p2:
                 return {
                     'content': env.from_string(success_text).render(user=user),
+                                                                    
                 }
             else:
                 show_message = True
@@ -84,5 +98,6 @@ def entry():
             user=user,
             composite=rsa.serialize_key(rsa.public_key).decode(),
             show_message=show_message,
+            brain_files=brain,
         ),
     }

@@ -11,9 +11,9 @@ from riddle.game.wasp10 import env
 entry_text = '''\
 {% extends "base" %}
 {% block body %}
-    <p>{{user.name}}, thanks to your help we broke in the server! This page was
-    set up to communicate more easily with you. Hopefully, the AI will not tear
-    it down before we collected all the required information.</p>
+    <p>{{user.name}}, this page was set up to communicate more easily with you.
+    Hopefully, the AI will not tear it down before we collected all the required
+    information.</p>
     {% if clues_count == 0 %}
     <p>Use the form below to upload any file that looks interesting and might
     give us a clue: we must understand the AI plans and how to destroy it!</p>
@@ -45,7 +45,7 @@ clues_count_needed = len(files)
 
 
 @on_success(redirect='/wasp9/breakin')
-@add_route("/wasp9/clues.php", endpoint="wasp9_clues", methods=['GET', 'POST'])
+@add_route("/wasp9/clues", endpoint="braindump_clues", methods=['GET', 'POST'])
 def entry():
     user = get_user(session.get('user_id'))
 

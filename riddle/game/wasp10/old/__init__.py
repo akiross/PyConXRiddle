@@ -31,8 +31,11 @@ to scout talents and invite them to participate in the competition. Those
 agents are still unaware of the fact that an EAI overtook our communications.
 Your job is now to find them and inform them of what is happening.
 You must gain their trust and let them know the truth. They might help you in 
-getting the necessary information to break into the system and destroy the AI.
-When you find them, don't forget my name.
+getting the necessary information to break into the system and destroy the AI,
+but you will not able to do it alone.
+If you find something interesting, use /wasp9/clues to send it to me.
+
+Remember my name when you meet the agents, it might be useful.
 Good luck.
 '''
 # But... WASP10 is now public, why having undercover agents? Why do they need

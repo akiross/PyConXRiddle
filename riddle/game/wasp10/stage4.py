@@ -22,21 +22,29 @@ entry_text = '''{% extends "form" %}
     {% call open_question("q_final_1") -%}
         <p>In order to complete this task you wll need to calculate the
         <a href="https://en.wikipedia.org/wiki/Longest_path_problem" target="_blank">longest path</a> 
-        between the node 0 and every other node of this graph:</p>
-        {%- for k, v in graph.items() %}<p>{{k}} → {% for el in v %}{{el}} {% endfor %}</p>{% endfor %}
-        <p>For example starting from this graph:</p>
-            <p> 0 -> 1 2 </p>
-            <p> 1 -> 3 4 </p>
-            <p> 3 -> 2 </p>
-            <p> 2 -> 4 </p>
+        starting from node 0 of this graph:</p>
+        <pre>
+        {%- for k, v in graph.items() %}
+{{k}} → {% for el in v %}{{el}} {% endfor %}
+{%- endfor -%}
+        </pre>
+        <p>For example, given the following graph:</p>
+        <pre>
+0 → 1 2
+1 → 3 4
+3 → 2
+2 → 4
+</pre>
         <p>The valid paths are:</p>
-            <p>0 1</p>
-            <p>0 2</p>
-            <p>0 1 3</p>
-            <p>0 1 4</p>
-            <p>0 2 4</p>
-            <p>0 1 3 2</p>
-            <p>0 1 3 2 4</p>
+        <ul>
+            <li>0 1</li>
+            <li>0 2</li>
+            <li>0 1 3</li>
+            <li>0 1 4</li>
+            <li>0 2 4</li>
+            <li>0 1 3 2</li>
+            <li>0 1 3 2 4</li>
+        </ul>
         <p>Therefore the longest path is 5</p>
     {%- endcall %}
     {{ hidden_field("stage", stage_num) }}

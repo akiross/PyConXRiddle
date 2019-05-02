@@ -7,7 +7,7 @@ from PIL import Image
 
 from riddle import database
 from riddle.tools import (
-    make_ith_bit_writer, write_to_image_bit,
+    lsb_writer,
     make_highly_variable_graph, calculate_graph_longest_path
 )
 
@@ -27,8 +27,7 @@ def init_db():
 @flask.cli.with_appcontext
 def write_stega_image(message, img_source_path, img_dest_path):
     img = Image.open(img_source_path)
-    msb_writer = make_ith_bit_writer(5)
-    img2 = write_to_image_bit(img, message.encode(), msb_writer)
+    img2 = write_to_image_bit(img, message.encode(), lsb_writer)
     img2.save(img_dest_path)
     click.echo(f'new image saved to {img_dest_path}')
 
