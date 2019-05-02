@@ -10,7 +10,7 @@ from jinja2 import Template
 from flask import session, request, current_app
 
 from riddle.names import random_name, _names, _adjectives
-from riddle.utils import create_user, get_user
+from riddle.utils import create_user, get_user, unset_user_flag
 from riddle.urls import without_answer, add_route
 
 from .. import env
@@ -86,7 +86,7 @@ def entry():
     user = get_user(session['user_id'])
     # print("GOT USER DATA", user)
     db = get_database(user)
-
+    unset_user_flag(session['user_id'], 'sanity-status')
     # Make this mutable
     args = dict(request.args)
 
