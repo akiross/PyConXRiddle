@@ -89,10 +89,15 @@ def entry():
 
     try:
         # Ensure host is a valid IP address
-        socket.inet_aton(target)
+        if ':' in target:
+            host, port = target.split(':')
+        else:
+            host = target
+        socket.inet_aton(host)
         try:
             req = urlopen(f'http://{target}',
-                          b64encode(success_message.encode())).read(1)
+                          b64encode(success_message.encode()),
+                          timeout=2).read(1)
             return {
                 'content': f'Content was retrieved successfully.',
                 'success': True,
@@ -106,7 +111,7 @@ def entry():
                 'content': f'Server closed connection unpexpectedly.',
                 'success': True,
             }
-    except socket.error:
+    except (socket.error, ValueError):
         return {
             'content': f'Invalid IP address for host 2, refusing to connect.',
         }

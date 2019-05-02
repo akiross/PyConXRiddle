@@ -538,6 +538,9 @@ def eval_expr(s, enabled_ops='pn+-*/^%'):
      - https://stackoverflow.com/a/9558001
      - https://docs.python.org/3/library/operator.html#mapping-operators-to-functions
     """
+    if not s:
+        return None  # Nothing to evaluate
+
     # Keep a table of operators that can be used
     op_table = {
         'p': (ast.UAdd, operator.pos),

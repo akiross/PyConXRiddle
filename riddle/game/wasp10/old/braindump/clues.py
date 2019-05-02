@@ -37,16 +37,10 @@ entry_text = '''\
 '''
 
 # FIXME better file loading
-FILES_LOC = Path(__file__) \
-    .absolute() \
-    .parents[4] / 'extras/public-desktop/CreatorHome/Documents/humans/29938924/'
-files = {f.stem: f.open().read.encode() for f in Path(FILES_LOC).glob('*')}
+FILES_LOC = Path(__file__).absolute().parents[4] / 'static' / '29938924'
 
-# {f: open(f'{FILES_LOC}/{f}').read().encode()
-# for f in 'contest e-mail riddle wasp10'.split()}
-
+files = {f.stem: f.open().read().encode() for f in FILES_LOC.glob('*')}
 clue_hashes = {md5(f).hexdigest(): n for n, f in files.items()}
-
 clues_count_needed = len(files)
 
 
@@ -56,6 +50,7 @@ def entry():
     user = get_user(session.get('user_id'))
 
     clues_count = session.get('clues_count', 0)
+    current_app.logger.info(f"Clues count for user {user} is currently {clues_count}/{clues_count_needed}")
     if request.method == 'POST':
         possible_clue = request.files.get('file')
         if possible_clue is None:

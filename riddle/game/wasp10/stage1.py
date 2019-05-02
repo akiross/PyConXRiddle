@@ -17,8 +17,8 @@ def q_basic_1(ans) -> "Integer e.g. 12345":
 @questions.append
 @validate(float)
 def q_basic_2(ans) -> "Real e.g. 123.45":
-    """Given the equation $$y = (log(4 * x + 1) * x) / log(9 * x**2 * e**x)$$
-       please compute $y$ when $x=42$.
+    """Given the equation $$y = \\frac{log(4 \cdot x + 1) \cdot x}{log(9 \cdot x^2 \cdot e^x)}$$
+       please compute \\(y\\) when \\(x=42\\).
        <p>Round to 2<sup>nd</sup> decimal digit.</p>
     """
     def _f(x):
@@ -40,14 +40,14 @@ def q_basic_3(ans) -> "Real e.g. 123.45":
 @questions.append
 @validate(float)
 def q_basic_4(ans) -> "Real e.g. 123.45":
-    """Compute the modulo of $4+3j$."""
+    """Compute the modulo of the complex number \\(4+3j\\)."""
     return ans == abs(4 + 3j)
 
 
 @questions.append
 @validate(lambda x: eval_expr(x, 'np+-'))
 def q_basic_5(ans) -> "Complex e.g. 12.3 + 4.5j":
-    """Compute $(7+4j)\\cdot(17-5j)$."""
+    """Compute \\((7+4j)\\cdot(17-5j)\\)."""
     return ans == ((7 + 4j) * (17 - 5j))
 
 

@@ -41,20 +41,19 @@ def q_math_2(ans) -> "Integer e.g. 12345":
 @questions.append
 @validate(lambda s: set(str(s)).issubset(set('+8')), check_only=True)
 def q_math_3(ans) -> "Sum of integers e.g. 8+8+8888+8+8":
-    """How can eight 8s sum up to 1000, using summation alone?"""
-    print("Checking if answer is 1000", ans)
+    """How can eight 8s sum up to 1000, using only addition?"""
     return eval_expr(ans) == 1000
 
 
 @questions.append
 @validate(int)
 def q_math_4(ans) -> "Integer e.g. 12345":
-    """<p>There is a 10 figure number where the first (most significant) digit
+    """<p>There is a 10 figures number where the first (most significant) digit
        tells how many zeros are present, the second digits tells how many ones
        are present, the third how many twos are present, and so on, until the
        tenth digit, which tells how many nines are in the number.</p>
-       <p>In other words, the number $a_0a_1a_2a_3...a_9$ where $a_i$ counts
-       the number of times digit $i$ appears in the number.</p>
+       <p>In other words, the number $$a_0a_1a_2a_3...a_9$$ where \\(a_i\\) counts
+       the number of times digit \\(i\\) appears in the number.</p>
        <p>What is this number?</p>
     """
     # TODO compute this solution
