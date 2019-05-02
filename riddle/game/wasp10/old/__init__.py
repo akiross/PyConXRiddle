@@ -46,7 +46,7 @@ join_date = "2009-10-30"
 
 hosts = (
     # Actually interesting hosts
-    (1, '127.0.0.1', 'telnet'),  # Password breaking challenge
+    (1, '127.0.0.1:8888', 'telnet'),  # Password breaking challenge
     (2, '5.44.12.71', 'http'),  # id=2 will be used by retrieve.php
     # Some random hosts
     # (3, '5.44.12.70', 'ftp'),

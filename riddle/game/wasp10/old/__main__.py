@@ -7,12 +7,13 @@ Run with python3 -m riddle.game.wasp10.old to start
 
 import logging
 import asyncio
+import argparse
 from . import password_hash
 from .message import encrypted_url
 
 
-HOST = "0.0.0.0"
-PORT = 8888
+HOST = None
+PORT = None
 
 GOAL_USER = b'monty-python'
 GOAL_DIGEST = password_hash(b'flying circus')
@@ -87,5 +88,13 @@ async def main():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", default=8888)
+    args = parser.parse_args()
+
+    HOST = args.host
+    PORT = args.port
+
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

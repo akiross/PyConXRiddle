@@ -77,7 +77,7 @@ error_text = '''{% extends "base" %}
 
 
 @add_route("/wasp9/fetch.php", endpoint="wasp9_fetch")
-@on_success(twins=['wasp9/message.php'])
+@on_success(twins=['wasp10/old/message'])
 def entry():
     user = get_user(session['user_id'])
     db = get_database(user)
@@ -96,7 +96,8 @@ def entry():
         socket.inet_aton(host)
         try:
             req = urlopen(f'http://{target}',
-                          b64encode(success_message.encode())).read(1)
+                          b64encode(success_message.encode()),
+                          timeout=30).read(1)
             return {
                 'content': f'Content was retrieved successfully.',
                 'answer': 'pass',

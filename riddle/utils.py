@@ -1,41 +1,10 @@
 import sqlite3
-import random
 from pathlib import Path
 
 from flask import current_app, session
 
 from riddle import database
 from riddle.names import generate_random_animal
-from riddle.tools import rot13
-
-
-help_message = rot13('''\
-We managed to inject this message in the unencrypted communication with
-the server, but the message might be garbled due to self-defensive
-systems.
-This is a pledge for help: the WASP10 challenge is staged by an
-Evolutionary Artificial Intelligence which took over the WASP10 council.
-All us members of the WASP10 are being isolated in any possible way and
-none of our messages is going through, but this one.
-We hope you found and read this message, because someone hacking
-in the system and shutting down the AI is our only hope. The AI is
-probably planning to start a global-scale cyber attack aimed to shut
-down human digital communications: if it succeeds, it will be chaos.
-We are sure that the attack will start on a smaller scale, trying to
-interfere with an event which is running *right now* and where many
-talented hackers are found, the PyConX Italia. By isolating them, the
-AI probably hopes to have and advantage by excluding some of its most
-threatening opponents.
-But if we stop the AI during this attack to the PyConX, we might be
-able to stop it before the global-scale attack starts!
-We believe the server where the WASP10 challenge is hosted is the only
-public interface of the AI with the world, so we must start from there.
-We are sure the system is simple, but robust, and there is not an easy
-access, but apparently there are some old entry-points previously used
-for computing the statistics of the WASP9 challenge that could be used
-to break in. Find them and do your best! We will try to support you
-whenever possible, keep your eyes open and send us any relevant message
-you find!'''.strip())
 
 
 def create_user():
@@ -279,11 +248,3 @@ def get_graph(id_=None):
     if rv is None:
         raise RuntimeError('longest path table not populated')
     return rv
-
-
-def add_help_message():
-    # could also check if sanity is tainted
-    user_flag = get_user_flag(session['user_id'], 'sanity-status')
-    if not random.randint(0, 1) and user_flag is not None:
-        return f'<!--\n{help_message}\n--> p>'
-    return ''
