@@ -13,7 +13,8 @@ BASE_URL = "/backups/wasp-members/creator-pc"
 @add_route(BASE_URL + "/<path:path>", endpoint="braindump_desktop_sub")
 def entry(path):
     root = Path(current_app.static_folder) 
-    content = root / 'CreatorHome'
+    content = root / 'creator-home'
+
     if path is not None:
         path.replace('..', '')
         content /= path

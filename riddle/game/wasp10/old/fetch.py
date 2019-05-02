@@ -12,7 +12,7 @@ from flask import session, request, current_app
 
 from riddle.names import random_name, _names, _adjectives
 from riddle.utils import create_user, get_user
-from riddle.urls import without_answer, add_route
+from riddle.urls import without_answer, add_route, on_success
 
 from .. import env
 from . import get_database, success_message
@@ -77,15 +77,15 @@ error_text = '''{% extends "base" %}
 
 
 @add_route("/wasp9/fetch.php", endpoint="wasp9_fetch")
+@on_success(twins=['wasp9/message.php'])
 def entry():
     user = get_user(session['user_id'])
-    print("GOT USER DATA", user)
     db = get_database(user)
 
     with db:
         res = db.execute('SELECT * FROM hosts WHERE id = 2')
         target = res.fetchone()[1]
-        print("Target database:", target)
+        current_app.logger.info(f"Target database: {target}")
 
     try:
         # Ensure host is a valid IP address
@@ -96,11 +96,10 @@ def entry():
         socket.inet_aton(host)
         try:
             req = urlopen(f'http://{target}',
-                          b64encode(success_message.encode()),
-                          timeout=2).read(1)
+                          b64encode(success_message.encode())).read(1)
             return {
                 'content': f'Content was retrieved successfully.',
-                'success': True,
+                'answer': 'pass',
             }
         except URLError:
             return {
@@ -109,7 +108,7 @@ def entry():
         except (client.RemoteDisconnected, client.BadStatusLine):
             return {
                 'content': f'Server closed connection unpexpectedly.',
-                'success': True,
+                'answer': 'pass',
             }
     except (socket.error, ValueError):
         return {

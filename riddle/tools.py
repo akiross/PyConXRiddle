@@ -623,7 +623,7 @@ if __name__ == '__main__':
         print("Generated keys", rsa.serialize_key(rsa.public_key),
                                 rsa.serialize_key(rsa.private_key))
 
-    if True:
+    if False:
         text = input("Insert the text you want to encode (will be stripped): ")
         text = text.strip()
 
@@ -631,3 +631,7 @@ if __name__ == '__main__':
         img2 = write_to_image_bit(img, text.encode(), lsb_writer)
         img2.save(input("Path for output image: "))
         print(read_from_image_bit(img2, lsb_reader).decode())
+
+    if True:
+        img = Image.open(input("Path for input image: "))
+        print(read_from_image_bit(img, lsb_reader)[:1000])

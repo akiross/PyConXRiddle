@@ -63,7 +63,8 @@ def get_user(user_id):
     return None
 
 
-def update_user_progress(user_id, level, score=1):
+def update_user_progress(user_id, level, score=1, force_score=False):
+    current_app.logger.info(f"Updating user progress for level {level}")
     db = database.get_connection()
     try:
         db.execute(
@@ -73,8 +74,13 @@ def update_user_progress(user_id, level, score=1):
             'UPDATE user SET score = score + ? WHERE id = ?',
             [score, user_id])
         db.commit()
+        current_app.logger.info(f"Level updated {level}")
     except sqlite3.IntegrityError:
-        pass  # Progress was already stored
+        if force_score:
+            db.execute(
+                'UPDATE progress SET score = ? WHERE user_id = ? AND level = ?',
+                [score, user_id, level])
+            current_app.logger.info(f"Level forced updated {level}")
 
 
 def query_user_progress(user_id):

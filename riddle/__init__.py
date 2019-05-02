@@ -22,6 +22,12 @@ def user_not_allowed(err):
     return "You can't touch this (403).", 403
 
 
+def get_routes():
+    level_map = current_app.config['level_map']
+    # Create a map from routes to level files
+    return {r: l for l in level_map for r in level_map[l]}
+
+
 def level_access_verification():
     """Return a message when user has no access to a requested level."""
     current_app.logger.debug("Checking user accessing")
@@ -36,9 +42,7 @@ def level_access_verification():
     current_app.logger.debug(f"Requested path: {accessed}")
     levels = [str(l) for l in utils.get_level_structure()]
     # We might get a request for a mapped entry point
-    level_map = current_app.config['level_map']
-    # Create a map from routes to level files
-    routes = {r: l for l in level_map for r in level_map[l]}
+    routes = get_routes()
     
     if '/'+accessed not in routes:
         current_app.logger.info("Cannot find level, should be 404")
@@ -100,7 +104,7 @@ def entry_point(func):
                     score = 0
             else:
                 raise ValueError("Answer should be pass or fail")
-        
+ 
         # Overrides
         if 'score' in resp:
             score = resp['score']
@@ -109,7 +113,18 @@ def entry_point(func):
 
         # If answer was given, save progress
         if answer_given:
-            utils.update_user_progress(session['user_id'], accessed, score)
+            # There are other levels that are set passed at the same time
+            force = hasattr(func, 'twins') and getattr(func, 'twins') is not None
+            if force:
+                for twin in getattr(func, 'twins'):
+                    utils.update_user_progress(session['user_id'], twin, 0)
+
+            print("Setting level as solved", accessed, score)
+            routes = get_routes()
+            if '/'+accessed in routes:
+                accessed = get_routes()['/'+accessed]
+            utils.update_user_progress(session['user_id'], accessed, score, force_score=True)
+
         # Redirect if necessary
         if target:
             return redirect(target, code=303)

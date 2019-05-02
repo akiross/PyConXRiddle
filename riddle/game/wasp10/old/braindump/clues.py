@@ -37,9 +37,13 @@ entry_text = '''\
 '''
 
 # FIXME better file loading
-FILES_LOC = Path(__file__).absolute().parents[4] / 'static' / '29938924'
+FILES_LOC = [
+    (Path(__file__).absolute().parents[4] / 'static' / '29938924').glob('*'),
+    [Path(__file__).absolute().parents[4] / 'static' / 'b83a886a5c437ccd9ac15473fd6f1788'],
+]
 
-files = {f.stem: f.open().read().encode() for f in FILES_LOC.glob('*')}
+files = {f.stem: f.open().read().encode() for fl in FILES_LOC for f in fl}
+
 clue_hashes = {md5(f).hexdigest(): n for n, f in files.items()}
 clues_count_needed = len(files)
 
