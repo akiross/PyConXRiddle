@@ -58,7 +58,7 @@ entry_text = '''{% extends "base" %}
         <input type="hidden" name="count" value="0" />
         <button type="submit">Reset counters</button>
     </form>
-    <!-- via fetch.php -->
+    <!-- via fetch -->
     <div>Remember to <i>fetch</i> new data after reset.</div>
 </div>
 {% endif %}
@@ -81,7 +81,7 @@ error_text = '''{% extends "base" %}
 
 
 @without_answer
-@add_route("/wasp9/stats.php", endpoint="wasp9_stats")
+@add_route("/wasp9/stats", endpoint="wasp9_stats")
 def entry():
     user = get_user(session['user_id'])
     # print("GOT USER DATA", user)
