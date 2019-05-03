@@ -71,6 +71,7 @@ success_text = '''\
             <li>github.com/akiross - Idea and implementation</li>
             <li>github.com/akita8 - Flask expert</li>
             <li>github.com/Recursing - Telnet server</li>
+            <li>github.com/tmmsartor - Inspiration and support</li>
             <li>github.com/csuriano23 - Beta testing</li>
         </ul>
     </div>
