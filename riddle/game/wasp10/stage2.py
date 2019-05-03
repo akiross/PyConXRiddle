@@ -9,8 +9,8 @@ questions = []
 @questions.append
 @validate(float)
 def q_math_1(ans) -> "Real e.g. 123.45":
-    """A bottle of pregiated Italian wine is worth 52 euros, the bottle of wine
-       alone is worth 50 euros more than the cork.
+    """A bottle of pregiated Italian wine is worth 52 euros. Without the cork,
+       it is worth 50 euros more than the cork.
        How many euros is the cork worth?
     """
     # b(ottle) + c(cork) = 52

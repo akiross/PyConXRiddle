@@ -114,9 +114,10 @@ def entry_point(func):
         # If answer was given, save progress
         if answer_given:
             # There are other levels that are set passed at the same time
-            force = hasattr(func, 'twins') and getattr(func, 'twins') is not None
+            force = getattr(func, 'twins', None) is not None
             if force:
                 for twin in getattr(func, 'twins'):
+                    print("Setting twin level as solved", accessed)
                     utils.update_user_progress(session['user_id'], twin, 0)
 
             print("Setting level as solved", accessed, score)

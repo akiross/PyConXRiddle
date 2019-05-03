@@ -54,6 +54,27 @@ success_text = '''\
     <h1>Success!</h1>
     <p>You did it! The factors you provided were correct!</p>
     <p>The Evolutionary Artificial Intelligence has been deactivated.</p>
+
+    <p>You saved the world.</p>
+    <p>Yes, you can write that on your CV. :)</p>
+
+    <div>Your user ID is: {{ user.name }} (remember it!)</div>
+    <div>Your final score is: {{ user.points }}</div>
+    <div>Just to be sure, send an e-mail to <b>riddle@pycon.it</b></div>
+
+    <hr/>
+    <p>The source code of this game will be published after the conference
+    at <a href="https://github.com/akiross/PyConXRiddle/">here.</a></p>
+    <div>
+        <b>Credits:</b>
+        <ul>
+            <li>github.com/akiross - Idea and implementation</li>
+            <li>github.com/akita8 - Flask expert</li>
+            <li>github.com/Recursing - Telnet server</li>
+            <li>github.com/tmmsartor - Inspiration and support</li>
+            <li>github.com/csuriano23 - Beta testing</li>
+        </ul>
+    </div>
 {% endblock %}
 '''
 

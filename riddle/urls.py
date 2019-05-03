@@ -42,7 +42,7 @@ def on_success(redirect=None, score=1, twins=None):
     """Determine what happens on level passed."""
     def _deco(entry):
         entry.on_success = (redirect, score)
-        entry.twins = None
+        entry.twins = twins
         return entry
     return _deco
 
@@ -51,7 +51,7 @@ def on_failure(redirect=None, score=0, twins=None):
     """Determine what happens on level failed."""
     def _deco(entry):
         entry.on_failure = (redirect, score)
-        entry.twins = None
+        entry.twins = twins
         return entry
     return _deco
 
@@ -61,6 +61,6 @@ def on_answer(redirect=None, success_score=1, failure_score=0, twins=None):
     def _deco(entry):
         entry.on_success = (redirect, success_score)
         entry.on_failure = (redirect, failure_score)
-        entry.twins = None
+        entry.twins = twins
         return entry
     return _deco
