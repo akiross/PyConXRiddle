@@ -58,7 +58,9 @@ success_text = '''\
     <p>You saved the world.</p>
     <p>Yes, you can write that on your CV. :)</p>
 
+    <div>Your user ID is: {{ user.name }} (remember it!)</div>
     <div>Your final score is: {{ user.points }}</div>
+    <div>Just to be sure, send an e-mail to <b>riddle@pycon.it</b></div>
 
     <hr/>
     <p>The source code of this game will be published after the conference
