@@ -11,7 +11,7 @@ from riddle import database
 from riddle import cli
 from riddle import utils
 
-__version__ = '1.0.0-dev'
+__version__ = '1.0.0'
 
 
 def page_not_found(err):
