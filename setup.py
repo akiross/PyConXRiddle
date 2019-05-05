@@ -13,7 +13,7 @@ packages = find_packages(include=['riddle', 'riddle.*'])
 
 setup(
     name='riddle',
-    version='0.2.0-dev-dev',
+    version='1.0.0-dev-dev',
     url='https://github.com/akiross/PyConXRiddle',
     license='LICENSE',
     description='riddle framework',
