@@ -1,7 +1,7 @@
 from pathlib import Path
 from jinja2 import Template
 from flask import current_app
-from riddle.urls import add_route
+from riddle.urls import add_route, without_answer
 
 from . import list_page
 
@@ -9,6 +9,7 @@ from . import list_page
 BASE_URL = "/backups/wasp-members/creator-pc"
 
 
+@without_answer
 @add_route(BASE_URL + "/", endpoint="braindump_desktop", defaults={'path': None})
 @add_route(BASE_URL + "/<path:path>", endpoint="braindump_desktop_sub")
 def entry(path):
@@ -35,5 +36,4 @@ def entry(path):
         'content': Template(list_page).render(directory=content.name,
                                               directories=directories,
                                               resources=resources),
-        'answer': 'pass',  # Solved as soon as it is opened
     }

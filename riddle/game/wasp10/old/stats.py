@@ -156,6 +156,12 @@ def entry():
             query = f'UPDATE {update} SET '
             query += ', '.join([f'{col} = "{val}"' for col, val in args.items()])
             # print("query", query)
+
+            if 'UPDATE user' in update:
+                return {
+                    'content': "You do not have enough permissions.",
+                }
+
             with db:
                 db.execute(query)
                 args = dict(user=user, message="Updated successfully.")
